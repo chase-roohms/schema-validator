@@ -1,0 +1,4 @@
+# JSON Schema representation in TOML format
+"$schema" = "http://json-schema.org/draft-07/schema#"
+title = "Any Schema"
+description = "Schema that allows any valid TOML"

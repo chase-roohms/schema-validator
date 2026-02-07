@@ -1,0 +1,8 @@
+name = "Alice Johnson"
+age = 28
+email = "alice.johnson@example.com"
+
+[address]
+street = "456 Oak Avenue"
+city = "Portland"
+zipcode = "97201"
