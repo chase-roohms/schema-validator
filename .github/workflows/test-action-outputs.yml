@@ -1,0 +1,452 @@
+name: Test Action Outputs
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test-validation-passed-output-true:
+    name: Test validation-passed Output (true)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Run Validation with Passing Files
+        id: validation-pass
+        uses: ./
+        with:
+          files: |
+            test-files/json/good_1.json
+            test-files/json/good_2.json
+            test-files/json/good_3.json
+          schema-file: test-files/json/person.schema.json
+          output-format: json
+          output-file: ${{ runner.temp }}/pass-results.json
+      
+      - name: Validate validation-passed Output is true
+        shell: bash
+        env:
+          VALIDATION_PASSED: ${{ steps.validation-pass.outputs.validation-passed }}
+        run: |
+          echo "validation-passed output: '$VALIDATION_PASSED'"
+          
+          if [[ "$VALIDATION_PASSED" != "true" ]]; then
+            echo "::error::Expected validation-passed to be 'true', got '$VALIDATION_PASSED'"
+            exit 1
+          fi
+          
+          echo "✅ validation-passed output is correctly set to true"
+      
+      - name: Validate output-file Output
+        shell: bash
+        env:
+          OUTPUT_FILE: ${{ steps.validation-pass.outputs.output-file }}
+          EXPECTED_PATH: ${{ runner.temp }}/pass-results.json
+        run: |
+          echo "output-file output: '$OUTPUT_FILE'"
+          echo "Expected path: '$EXPECTED_PATH'"
+          
+          if [[ "$OUTPUT_FILE" != "$EXPECTED_PATH" ]]; then
+            echo "::error::Expected output-file to be '$EXPECTED_PATH', got '$OUTPUT_FILE'"
+            exit 1
+          fi
+          
+          echo "✅ output-file output is correctly set"
+
+  test-validation-passed-output-false:
+    name: Test validation-passed Output (false)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Run Validation with Failing Files
+        id: validation-fail
+        uses: ./
+        continue-on-error: true
+        with:
+          files: |
+            test-files/json/bad_1.json
+            test-files/json/bad_2.json
+            test-files/json/bad_3.json
+          schema-file: test-files/json/person.schema.json
+          output-format: json
+          output-file: ${{ runner.temp }}/fail-results.json
+      
+      - name: Validate validation-passed Output is false
+        shell: bash
+        env:
+          VALIDATION_PASSED: ${{ steps.validation-fail.outputs.validation-passed }}
+        run: |
+          echo "validation-passed output: '$VALIDATION_PASSED'"
+          
+          if [[ "$VALIDATION_PASSED" != "false" ]]; then
+            echo "::error::Expected validation-passed to be 'false', got '$VALIDATION_PASSED'"
+            exit 1
+          fi
+          
+          echo "✅ validation-passed output is correctly set to false"
+      
+      - name: Validate output-file Output
+        shell: bash
+        env:
+          OUTPUT_FILE: ${{ steps.validation-fail.outputs.output-file }}
+          EXPECTED_PATH: ${{ runner.temp }}/fail-results.json
+        run: |
+          echo "output-file output: '$OUTPUT_FILE'"
+          echo "Expected path: '$EXPECTED_PATH'"
+          
+          if [[ "$OUTPUT_FILE" != "$EXPECTED_PATH" ]]; then
+            echo "::error::Expected output-file to be '$EXPECTED_PATH', got '$OUTPUT_FILE'"
+            exit 1
+          fi
+          
+          echo "✅ output-file output is correctly set"
+      
+      - name: Verify Action Failed
+        shell: bash
+        env:
+          OUTCOME: ${{ steps.validation-fail.outcome }}
+        run: |
+          if [[ "$OUTCOME" != "failure" ]]; then
+            echo "::error::Expected action to fail when validation fails"
+            exit 1
+          fi
+          
+          echo "✅ Action correctly failed when validation failed"
+
+  test-outputs-with-default-output-file:
+    name: Test Outputs with Default output-file
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Run Validation with Default Output File
+        id: validation-default
+        uses: ./
+        with:
+          files: test-files/yaml/good_1.yaml
+          schema-file: test-files/yaml/person.schema.yaml
+          output-format: json
+      
+      - name: Validate validation-passed Output
+        shell: bash
+        env:
+          VALIDATION_PASSED: ${{ steps.validation-default.outputs.validation-passed }}
+        run: |
+          echo "validation-passed output: '$VALIDATION_PASSED'"
+          
+          if [[ "$VALIDATION_PASSED" != "true" ]]; then
+            echo "::error::Expected validation-passed to be 'true', got '$VALIDATION_PASSED'"
+            exit 1
+          fi
+          
+          echo "✅ validation-passed output is correctly set to true"
+      
+      - name: Validate output-file Output with Default Path
+        shell: bash
+        env:
+          OUTPUT_FILE: ${{ steps.validation-default.outputs.output-file }}
+          EXPECTED_DEFAULT: ${{ runner.temp }}/validation-results
+        run: |
+          echo "output-file output: '$OUTPUT_FILE'"
+          echo "Expected default: '$EXPECTED_DEFAULT'"
+          
+          if [[ "$OUTPUT_FILE" != "$EXPECTED_DEFAULT" ]]; then
+            echo "::error::Expected output-file to be default '$EXPECTED_DEFAULT', got '$OUTPUT_FILE'"
+            exit 1
+          fi
+          
+          echo "✅ output-file output correctly returns default path"
+
+  test-outputs-with-xml-validation:
+    name: Test Outputs with XML Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Run XML Validation (Passing)
+        id: xml-pass
+        uses: ./
+        with:
+          files: |
+            test-files/xml/good_1.xml
+            test-files/xml/good_2.xml
+          schema-file: test-files/xml/person.schema.xsd
+          output-format: text
+          output-file: ./xml-pass-results.txt
+      
+      - name: Validate Outputs for Passing XML Validation
+        shell: bash
+        env:
+          VALIDATION_PASSED: ${{ steps.xml-pass.outputs.validation-passed }}
+          OUTPUT_FILE: ${{ steps.xml-pass.outputs.output-file }}
+        run: |
+          echo "validation-passed: '$VALIDATION_PASSED'"
+          echo "output-file: '$OUTPUT_FILE'"
+          
+          if [[ "$VALIDATION_PASSED" != "true" ]]; then
+            echo "::error::Expected validation-passed to be 'true'"
+            exit 1
+          fi
+          
+          if [[ "$OUTPUT_FILE" != "./xml-pass-results.txt" ]]; then
+            echo "::error::Expected output-file to be './xml-pass-results.txt'"
+            exit 1
+          fi
+          
+          echo "✅ Both outputs correctly set for XML validation"
+      
+      - name: Run XML Validation (Failing)
+        id: xml-fail
+        uses: ./
+        continue-on-error: true
+        with:
+          files: |
+            test-files/xml/bad_1.xml
+            test-files/xml/bad_2.xml
+          schema-file: test-files/xml/person.schema.xsd
+          output-format: text
+          output-file: ./xml-fail-results.txt
+      
+      - name: Validate Outputs for Failing XML Validation
+        shell: bash
+        env:
+          VALIDATION_PASSED: ${{ steps.xml-fail.outputs.validation-passed }}
+          OUTPUT_FILE: ${{ steps.xml-fail.outputs.output-file }}
+        run: |
+          echo "validation-passed: '$VALIDATION_PASSED'"
+          echo "output-file: '$OUTPUT_FILE'"
+          
+          if [[ "$VALIDATION_PASSED" != "false" ]]; then
+            echo "::error::Expected validation-passed to be 'false'"
+            exit 1
+          fi
+          
+          if [[ "$OUTPUT_FILE" != "./xml-fail-results.txt" ]]; then
+            echo "::error::Expected output-file to be './xml-fail-results.txt'"
+            exit 1
+          fi
+          
+          echo "✅ Both outputs correctly set for failing XML validation"
+
+  test-outputs-with-schema-url:
+    name: Test Outputs with Schema URL
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Run Validation with Schema URL (Passing)
+        id: url-pass
+        uses: ./
+        with:
+          files: |
+            test-files/json/good_1.json
+            test-files/json/good_2.json
+          schema-url: https://raw.githubusercontent.com/chase-roohms/schema-validator/${{ github.ref }}/test-files/json/person.schema.json
+          output-format: json
+          output-file: ${{ runner.temp }}/url-pass.json
+      
+      - name: Validate Outputs for Schema URL (Passing)
+        shell: bash
+        env:
+          VALIDATION_PASSED: ${{ steps.url-pass.outputs.validation-passed }}
+          OUTPUT_FILE: ${{ steps.url-pass.outputs.output-file }}
+          EXPECTED_PATH: ${{ runner.temp }}/url-pass.json
+        run: |
+          echo "validation-passed: '$VALIDATION_PASSED'"
+          echo "output-file: '$OUTPUT_FILE'"
+          
+          if [[ "$VALIDATION_PASSED" != "true" ]]; then
+            echo "::error::Expected validation-passed to be 'true'"
+            exit 1
+          fi
+          
+          if [[ "$OUTPUT_FILE" != "$EXPECTED_PATH" ]]; then
+            echo "::error::Expected output-file to be '$EXPECTED_PATH', got '$OUTPUT_FILE'"
+            exit 1
+          fi
+          
+          echo "✅ Both outputs correctly set with schema URL"
+      
+      - name: Run Validation with Schema URL (Failing)
+        id: url-fail
+        uses: ./
+        continue-on-error: true
+        with:
+          files: |
+            test-files/yaml/bad_1.yaml
+            test-files/yaml/bad_2.yaml
+          schema-url: https://raw.githubusercontent.com/chase-roohms/schema-validator/${{ github.ref }}/test-files/yaml/person.schema.yaml
+          output-format: text
+          output-file: ${{ runner.temp }}/url-fail.txt
+      
+      - name: Validate Outputs for Schema URL (Failing)
+        shell: bash
+        env:
+          VALIDATION_PASSED: ${{ steps.url-fail.outputs.validation-passed }}
+          OUTPUT_FILE: ${{ steps.url-fail.outputs.output-file }}
+          EXPECTED_PATH: ${{ runner.temp }}/url-fail.txt
+        run: |
+          echo "validation-passed: '$VALIDATION_PASSED'"
+          echo "output-file: '$OUTPUT_FILE'"
+          
+          if [[ "$VALIDATION_PASSED" != "false" ]]; then
+            echo "::error::Expected validation-passed to be 'false'"
+            exit 1
+          fi
+          
+          if [[ "$OUTPUT_FILE" != "$EXPECTED_PATH" ]]; then
+            echo "::error::Expected output-file to be '$EXPECTED_PATH', got '$OUTPUT_FILE'"
+            exit 1
+          fi
+          
+          echo "✅ Both outputs correctly set with schema URL"
+
+  test-outputs-with-mixed-files:
+    name: Test Outputs with Mixed File Formats
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Run Validation with Mixed Files (Passing)
+        id: mixed-pass
+        uses: ./
+        with:
+          files: |
+            test-files/json/good_1.json
+            test-files/yaml/good_1.yaml
+            test-files/json/good_2.json
+            test-files/yaml/good_2.yaml
+          schema-file: test-files/json/person.schema.json
+          output-format: json
+          output-file: ${{ runner.temp }}/mixed-pass.json
+      
+      - name: Validate Outputs for Mixed Files (Passing)
+        shell: bash
+        env:
+          VALIDATION_PASSED: ${{ steps.mixed-pass.outputs.validation-passed }}
+          OUTPUT_FILE: ${{ steps.mixed-pass.outputs.output-file }}
+          EXPECTED_PATH: ${{ runner.temp }}/mixed-pass.json
+        run: |
+          echo "validation-passed: '$VALIDATION_PASSED'"
+          echo "output-file: '$OUTPUT_FILE'"
+          
+          if [[ "$VALIDATION_PASSED" != "true" ]]; then
+            echo "::error::Expected validation-passed to be 'true'"
+            exit 1
+          fi
+          
+          if [[ "$OUTPUT_FILE" != "$EXPECTED_PATH" ]]; then
+            echo "::error::Expected output-file to be '$EXPECTED_PATH', got '$OUTPUT_FILE'"
+            exit 1
+          fi
+          
+          echo "✅ Both outputs correctly set with mixed files (passing)"
+      
+      - name: Run Validation with Mixed Files (Failing)
+        id: mixed-fail
+        uses: ./
+        continue-on-error: true
+        with:
+          files: |
+            test-files/json/bad_1.json
+            test-files/yaml/bad_1.yaml
+            test-files/json/bad_2.json
+            test-files/yaml/bad_2.yaml
+          schema-file: test-files/yaml/person.schema.yaml
+          output-format: text
+          output-file: ${{ runner.temp }}/mixed-fail.txt
+      
+      - name: Validate Outputs for Mixed Files (Failing)
+        shell: bash
+        env:
+          VALIDATION_PASSED: ${{ steps.mixed-fail.outputs.validation-passed }}
+          OUTPUT_FILE: ${{ steps.mixed-fail.outputs.output-file }}
+          EXPECTED_PATH: ${{ runner.temp }}/mixed-fail.txt
+        run: |
+          echo "validation-passed: '$VALIDATION_PASSED'"
+          echo "output-file: '$OUTPUT_FILE'"
+          
+          if [[ "$VALIDATION_PASSED" != "false" ]]; then
+            echo "::error::Expected validation-passed to be 'false'"
+            exit 1
+          fi
+          
+          if [[ "$OUTPUT_FILE" != "$EXPECTED_PATH" ]]; then
+            echo "::error::Expected output-file to be '$EXPECTED_PATH', got '$OUTPUT_FILE'"
+            exit 1
+          fi
+          
+          echo "✅ Both outputs correctly set with mixed files (failing)"
+
+  test-outputs-with-nested-path:
+    name: Test Outputs with Nested Output Path
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Run Validation with Nested Output Path
+        id: nested-path
+        uses: ./
+        with:
+          files: test-files/json/good_1.json
+          schema-file: test-files/json/person.schema.json
+          output-format: json
+          output-file: ${{ runner.temp }}/deeply/nested/path/results.json
+      
+      - name: Validate Outputs with Nested Path
+        shell: bash
+        env:
+          VALIDATION_PASSED: ${{ steps.nested-path.outputs.validation-passed }}
+          OUTPUT_FILE: ${{ steps.nested-path.outputs.output-file }}
+          EXPECTED_PATH: ${{ runner.temp }}/deeply/nested/path/results.json
+        run: |
+          echo "validation-passed: '$VALIDATION_PASSED'"
+          echo "output-file: '$OUTPUT_FILE'"
+          
+          if [[ "$VALIDATION_PASSED" != "true" ]]; then
+            echo "::error::Expected validation-passed to be 'true'"
+            exit 1
+          fi
+          
+          if [[ "$OUTPUT_FILE" != "$EXPECTED_PATH" ]]; then
+            echo "::error::Expected output-file to be '$EXPECTED_PATH', got '$OUTPUT_FILE'"
+            exit 1
+          fi
+          
+          # Verify the file actually exists at the path
+          if [[ ! -f "$OUTPUT_FILE" ]]; then
+            echo "::error::Output file does not exist at reported path: $OUTPUT_FILE"
+            exit 1
+          fi
+          
+          echo "✅ Both outputs correctly set with nested path"
