@@ -1,7 +1,6 @@
 import argparse
 import os
 
-from pprint import pp
 from data_load import DataLoader
 from jsonschema import validate, ValidationError, SchemaError
 from lxml import etree
@@ -26,9 +25,6 @@ def main():
     for key, value in vars_args.items():
         if value == '':
             vars_args[key] = None
-    # Print parsed arguments for debugging
-    print("Parsed arguments:")
-    pp(vars_args)
 
     # Set files to validate
     if vars_args['files']:
