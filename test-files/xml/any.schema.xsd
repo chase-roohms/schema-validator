@@ -1,23 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           elementFormDefault="qualified">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
   
-  <!-- Allow any element as root -->
-  <xs:element name="root">
-    <xs:complexType>
+  <!-- Match any element at any namespace -->
+  <xs:element name="person" type="xs:anyType"/>
+  <xs:element name="root" type="xs:anyType"/>
+  <xs:element name="data" type="xs:anyType"/>
+  <xs:element name="document" type="xs:anyType"/>
+  
+  <!-- Wildcard to match any other element -->
+  <xs:element name="any">
+    <xs:complexType mixed="true">
       <xs:sequence>
-        <xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip"/>
+        <xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip" namespace="##any"/>
       </xs:sequence>
       <xs:anyAttribute processContents="skip"/>
     </xs:complexType>
   </xs:element>
-  
-  <!-- Alternative: define a type that accepts anything -->
-  <xs:complexType name="anyType" mixed="true">
-    <xs:sequence>
-      <xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip"/>
-    </xs:sequence>
-    <xs:anyAttribute processContents="skip"/>
-  </xs:complexType>
   
 </xs:schema>
