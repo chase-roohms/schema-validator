@@ -26,4 +26,4 @@ jobs:
         with:
           files: |
             test-files/json/good_1.json
-          schema-file: test-files/json/example.schema.json
+          schema-file: test-files/json/person.schema.json
