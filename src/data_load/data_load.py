@@ -29,7 +29,8 @@ class DataLoader:
             "yaml": "yaml",
             "yml": "yaml",
             "json": "json",
-            "xml": "xml"
+            "xml": "xml",
+            "xsd": "xml"
         }
         ext = file_path.split(".")[-1].lower()
         return format_map.get(ext, ext)
