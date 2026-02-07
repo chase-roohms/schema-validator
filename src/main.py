@@ -70,6 +70,7 @@ def main():
     else:
         is_xsd = False
     
+    error_dict = dict()
     # Validate files against schema
     for file_path, file_data in files_to_validate.items():
         try:
@@ -81,16 +82,22 @@ def main():
                     print(f"File {file_path} is valid.")
                 else:
                     print(f"File {file_path} is invalid: {schema_data.error_log}")
+                    error_dict[file_path] = schema_data.error_log
             else:
                 # Validate using JSON Schema (works for JSON and YAML after parsing)
                 validate(instance=file_data, schema=schema_data)
                 print(f"File {file_path} is valid.")
-        except ValidationError as e:
-            print(f"File {file_path} is invalid: {e.message}")
-        except etree.DocumentInvalid as e:
-            print(f"File {file_path} is invalid: {e}")
+        except (ValidationError, etree.DocumentInvalid) as e:
+            raise
         except Exception as e:
             print(f"File {file_path} validation error: {e}")
+            error_dict[file_path] = str(e)
+    
+    if len(error_dict) > 0:
+        print("Validation errors found:")
+        for file_path, error in error_dict.items():
+            print(f"{file_path}: {error}")
+        quit(1)
 
 if __name__ == "__main__":
     main()
