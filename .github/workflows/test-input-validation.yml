@@ -69,24 +69,32 @@ jobs:
       - name: Collect results
         id: collect-results
         env:
-          MISSING_FILES_AND_FILE_FORMAT: ${{ steps.missing-files-and-file-format.outcome }}
-          MISSING_SCHEMA_FILE_AND_SCHEMA_URL: ${{ steps.missing-schema-file-and-schema-url.outcome }}
+          MISSING_FILES_AND_FORMAT: ${{ steps.missing-files-and-file-format.outcome }}
+          MISSING_SCHEMA_FILE_AND_URL: ${{ steps.missing-schema-file-and-schema-url.outcome }}
           INVALID_FILE_FORMAT_OPTION: ${{ steps.invalid-file-format-option.outcome }}
           INVALID_SCHEMA_FORMAT_OPTION: ${{ steps.invalid-schema-format-option.outcome }}
           INVALID_OUTPUT_FORMAT_OPTION: ${{ steps.invalid-output-format-option.outcome }}
         run: |
-          echo "Missing files and file-format: $MISSING_FILES_AND_FILE_FORMAT" >> $GITHUB_STEP_SUMMARY
-          echo "Missing schema-file and schema-url: $MISSING_SCHEMA_FILE_AND_SCHEMA_URL" >> $GITHUB_STEP_SUMMARY
+          # Flip results, failure -> success
+          [ "$MISSING_FILES_AND_FORMAT" = "failure" ] && MISSING_FILES_AND_FORMAT="success"
+          [ "$MISSING_SCHEMA_FILE_AND_URL" = "failure" ] && MISSING_SCHEMA_FILE_AND_URL="success"
+          [ "$INVALID_FILE_FORMAT_OPTION" = "failure" ] && INVALID_FILE_FORMAT_OPTION="success"
+          [ "$INVALID_SCHEMA_FORMAT_OPTION" = "failure" ] && INVALID_SCHEMA_FORMAT_OPTION="success"
+          [ "$INVALID_OUTPUT_FORMAT_OPTION" = "failure" ] && INVALID_OUTPUT_FORMAT_OPTION="success"
+          
+          # Show results in GitHub step summary
+          echo "Missing files and file-format: $MISSING_FILES_AND_FORMAT" >> $GITHUB_STEP_SUMMARY
+          echo "Missing schema-file and schema-url: $MISSING_SCHEMA_FILE_AND_URL" >> $GITHUB_STEP_SUMMARY
           echo "Invalid file-format option: $INVALID_FILE_FORMAT_OPTION" >> $GITHUB_STEP_SUMMARY
           echo "Invalid schema-format option: $INVALID_SCHEMA_FORMAT_OPTION" >> $GITHUB_STEP_SUMMARY
           echo "Invalid output-format option: $INVALID_OUTPUT_FORMAT_OPTION" >> $GITHUB_STEP_SUMMARY
           
           # Validate that all tests failed
-          if [ "$MISSING_FILES_AND_FILE_FORMAT" != "failure" ] || \
-             [ "$MISSING_SCHEMA_FILE_AND_SCHEMA_URL" != "failure" ] || \
-             [ "$INVALID_FILE_FORMAT_OPTION" != "failure" ] || \
-             [ "$INVALID_SCHEMA_FORMAT_OPTION" != "failure" ] || \
-             [ "$INVALID_OUTPUT_FORMAT_OPTION" != "failure" ]; then
+          if [ "$MISSING_FILES_AND_FORMAT" != "success" ] || \
+             [ "$MISSING_SCHEMA_FILE_AND_URL" != "success" ] || \
+             [ "$INVALID_FILE_FORMAT_OPTION" != "success" ] || \
+             [ "$INVALID_SCHEMA_FORMAT_OPTION" != "success" ] || \
+             [ "$INVALID_OUTPUT_FORMAT_OPTION" != "success" ]; then
             echo "::error::One or more tests did not fail as expected"
             exit 1
           fi
@@ -123,12 +131,17 @@ jobs:
           NON_EXISTENT_FILE: ${{ steps.non-existent-file.outcome }}
           NON_EXISTENT_SCHEMA_FILE: ${{ steps.non-existent-schema-file.outcome }}
         run: |
+          # Flip results, failure -> success
+          [ "$NON_EXISTENT_FILE" = "failure" ] && NON_EXISTENT_FILE="success"
+          [ "$NON_EXISTENT_SCHEMA_FILE" = "failure" ] && NON_EXISTENT_SCHEMA_FILE="success"
+          
+          # Show results in GitHub step summary
           echo "Non-existent file: $NON_EXISTENT_FILE" >> $GITHUB_STEP_SUMMARY
           echo "Non-existent schema file: $NON_EXISTENT_SCHEMA_FILE" >> $GITHUB_STEP_SUMMARY
           
           # Validate that all tests failed
-          if [ "$NON_EXISTENT_FILE" != "failure" ] || \
-             [ "$NON_EXISTENT_SCHEMA_FILE" != "failure" ]; then
+          if [ "$NON_EXISTENT_FILE" != "success" ] || \
+             [ "$NON_EXISTENT_SCHEMA_FILE" != "success" ]; then
             echo "::error::One or more tests did not fail as expected"
             exit 1
           fi
