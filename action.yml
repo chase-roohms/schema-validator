@@ -1,0 +1,153 @@
+---
+name: Schema Validator
+author: Chase Roohms
+description: Validate JSON, YAML, and XML files against a schema. Schemas can be provided either via file or URL.
+branding:
+  icon: 'align-left'
+  color: 'blue'
+
+
+inputs:
+  files:
+    description: |
+      The files to validate, seperated by newline. 
+      If not provided, all files matching the specified format in the repository will be validated.
+    required: false
+  file-format:
+    description: |
+      The format of the files to validate.
+      Options: json, yaml, xml
+      Inferred from the file extensions of inputs.files if not provided.
+      Required if inputs.files is not provided.
+    required: false
+  schema-file:
+    description: |
+      The schema file to validate against.
+      Must exist on the runner.
+    required: false
+  schema-url:
+    description: |
+      The URL of the schema to validate against.
+      Will be fetched and used for validation.
+    required: false
+  schema-format:
+    description: |
+      The format of the schema.
+      Options: json, yaml, xml
+      Will be inferred from the file extension if not provided.
+    required: false
+  output-format:
+    description: |
+      The format of the validation results.
+      Options: json, text
+    required: false
+  output-file:
+    # Used instead of outputs since there is a chance the output size could be too
+    # large for GitHub Actions to handle as an output. (Max 1 MB)
+    # See: https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax#outputs-for-composite-actions
+    description: 'The file to write the validation results to'
+    required: false
+    default: ${{ runner.temp }}/validation-results
+
+
+outputs:
+  validation-passed:
+    description: 'Indicates whether the validation passed or failed (true or false)'
+    value: ${{ steps.validate.outputs.validation-results }}
+  output-file:
+    description: 'The file to write the validation results to'
+    value: ${{ inputs.output-file }}
+
+
+runs:
+  using: 'composite'
+  steps:
+    ########################### Pre-Validation Checks ##########################
+    - name: Validate Inputs
+      id: validate-inputs
+      shell: bash
+      env:
+        FILES: ${{ inputs.files }}
+        FILE_FORMAT: ${{ inputs.file-format }}
+        SCHEMA_FILE: ${{ inputs.schema-file }}
+        SCHEMA_URL: ${{ inputs.schema-url }}
+        SCHEMA_FORMAT: ${{ inputs.schema-format }}
+        OUTPUT_FORMAT: ${{ inputs.output-format }}
+        OUTPUT_FILE: ${{ inputs.output-file }}
+      run: |
+        ###################### required inputs ######################
+        # Validate that either 'files' or 'file-format' is provided
+        if [[ -z "$FILES" && -z "$FILE_FORMAT" ]]; then
+          echo "::error::Either 'files' or 'file-format' must be provided."
+          exit 1
+        fi
+
+        # Validate that either 'schema-file' or 'schema-url' is provided
+        if [[ -z "$SCHEMA_FILE" && -z "$SCHEMA_URL" ]]; then
+          echo "::error::Either 'schema-file' or 'schema-url' must be provided."
+          exit 1
+        fi
+
+        #################### inputs with options ####################
+        # Validate the file format is an accepted value
+        valid_file_formats=("json" "yaml" "xml")
+        if [[ -n "$FILE_FORMAT" && ! " ${valid_file_formats[@]} " =~ " $FILE_FORMAT " ]]; then
+          echo "::error::Invalid file format '$FILE_FORMAT'. Valid options are: ${valid_file_formats[*]}"
+          exit 1
+        fi
+
+        # Validate the schema format is an accepted value
+        valid_schema_formats=("json" "yaml" "xml")
+        if [[ -n "$SCHEMA_FORMAT" && ! " ${valid_schema_formats[@]} " =~ " $SCHEMA_FORMAT " ]]; then
+          echo "::error::Invalid schema format '$SCHEMA_FORMAT'. Valid options are: ${valid_schema_formats[*]}"
+          exit 1
+        fi
+
+        # Validate the output format is an accepted value
+        valid_output_formats=("json" "text")
+        if [[ -n "$OUTPUT_FORMAT" && ! " ${valid_output_formats[@]} " =~ " $OUTPUT_FORMAT " ]]; then
+          echo "::error::Invalid output format '$OUTPUT_FORMAT'. Valid options are: ${valid_output_formats[*]}"
+          exit 1
+        fi
+    
+    - name: Validate Repository was Checked Out
+      id: validate-checkout
+      shell: bash
+      run: |
+        # Check if the repository was checked out
+        if [[ ! -d ".git" ]]; then
+          echo "::error::Repository not checked out. Did you forget to add a checkout step?"
+          exit 1
+        fi
+
+    - name: Validate Files Exist
+      if: ${{ inputs.files != '' }}
+      id: validate-files
+      shell: bash
+      env:
+        FILES: ${{ inputs.files }}
+      run: |
+        # Iterate through inputs.files
+        if [[ -n "$FILES" ]]; then
+          IFS=$'\n' read -r -d '' -a files <<< "$FILES"
+          for file in "${files[@]}"; do
+            # Check if the file exists
+            if [[ ! -f "$file" ]]; then
+              echo "::error::File not found: $file."
+              exit 1
+            fi
+          done
+        fi
+    
+    - name: Validate Schema File Exists
+      if: ${{ inputs.schema-file != '' }}
+      id: validate-schema-file
+      shell: bash
+      env:
+        SCHEMA_FILE: ${{ inputs.schema-file }}
+      run: |
+        # Check if the schema file exists
+        if [[ ! -f "$SCHEMA_FILE" ]]; then
+          echo "::error::Schema file not found: $SCHEMA_FILE."
+          exit 1
+        fi
