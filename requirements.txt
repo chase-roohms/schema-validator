@@ -3,3 +3,4 @@ PyYAML==6.0.3
 jsonschema==4.23.0
 lxml==5.3.0
 requests==2.32.5
+toml==0.10.2
