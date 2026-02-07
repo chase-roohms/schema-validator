@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<person>
+  <name>Bob Smith</name>
+  <age>65</age>
+  <email>bob.smith@company.org</email>
+</person>

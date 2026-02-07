@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<person>
+  <name>Alice Johnson</name>
+  <age>28</age>
+  <email>alice.johnson@example.com</email>
+  <address>
+    <street>456 Oak Avenue</street>
+    <city>Portland</city>
+    <zipcode>97201</zipcode>
+  </address>
+</person>

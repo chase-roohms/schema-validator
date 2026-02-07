@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="person">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="NameType"/>
+        <xs:element name="age" type="AgeType"/>
+        <xs:element name="email" type="EmailType"/>
+        <xs:element name="address" type="AddressType" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:simpleType name="NameType">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="100"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="AgeType">
+    <xs:restriction base="xs:integer">
+      <xs:minInclusive value="0"/>
+      <xs:maxInclusive value="150"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="EmailType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:complexType name="AddressType">
+    <xs:sequence>
+      <xs:element name="street" type="xs:string" minOccurs="0"/>
+      <xs:element name="city" type="xs:string" minOccurs="0"/>
+      <xs:element name="zipcode" type="ZipcodeType" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:simpleType name="ZipcodeType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9]{5}(-[0-9]{4})?"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

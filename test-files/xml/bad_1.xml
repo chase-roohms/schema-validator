@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<person>
+  <name>John Doe</name>
+  <age>-5</age>
+  <email>john@example.com</email>
+</person>
