@@ -6,6 +6,7 @@
   <xs:element name="root" type="xs:anyType"/>
   <xs:element name="data" type="xs:anyType"/>
   <xs:element name="document" type="xs:anyType"/>
+  <xs:element name="schema" type="xs:anyType"/>
   
   <!-- Wildcard to match any other element -->
   <xs:element name="any">
