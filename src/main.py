@@ -40,7 +40,7 @@ def main():
             'xml': ['.xml', '.xsd']
         }
         extensions = format_extensions.get(vars_args['file_format'], [f".{vars_args['file_format']}"])
-        vars_args['files'] = [f for f in os.listdir('.') if any(f.endswith(ext) for ext in extensions)]
+        vars_args['files'] = [f for f in os.listdir('.') if any(f.endswith(ext) and f != os.path.abspath(vars_args['schema_file']) for ext in extensions)]
     
     # Save dictionary with the filepaths as keys and the data from each file as values
     files_to_validate = {
