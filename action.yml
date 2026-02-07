@@ -82,9 +82,9 @@ runs:
           exit 1
         fi
 
-        # Validate that either 'schema-file' or 'schema-url' is provided
-        if [[ -z "$SCHEMA_FILE" && -z "$SCHEMA_URL" ]]; then
-          echo "::error::Either 'schema-file' or 'schema-url' must be provided."
+        # Validate that exactly one of 'schema-file' or 'schema-url' is provided
+        if [[ -z "$SCHEMA_FILE" && -z "$SCHEMA_URL" ]] || [[ -n "$SCHEMA_FILE" && -n "$SCHEMA_URL" ]]; then
+          echo "::error::Exactly one of 'schema-file' or 'schema-url' must be provided."
           exit 1
         fi
 
@@ -152,16 +152,17 @@ runs:
           exit 1
         fi
     
-    - name: Validate Schema URL Exists
+    - name: Download Schema
       if: ${{ inputs.schema-url != '' }}
-      id: validate-schema-url
+      id: download-schema
       shell: bash
       env:
         SCHEMA_URL: ${{ inputs.schema-url }}
+        SCHEMA_OUTPUT_FILE: ${{ runner.temp }}/schema.json
       run: |
-        # Check if the schema URL is reachable
-        if ! curl --head --silent --fail "$SCHEMA_URL" > /dev/null; then
-          echo "::error::Schema URL not reachable: $SCHEMA_URL."
+        # Download the schema from the URL using wget
+        if ! wget -q -O "$SCHEMA_OUTPUT_FILE" "$SCHEMA_URL"; then
+          echo "::error::Failed to download schema from URL: $SCHEMA_URL."
           exit 1
         fi
     

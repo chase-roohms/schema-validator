@@ -32,6 +32,17 @@ jobs:
         with:
           files: |
             test-files/good_1.json
+
+      # Both schema-file and schema-url
+      - name: Both schema-file and schema-url
+        id: both-schema-file-and-schema-url
+        uses: ./
+        continue-on-error: true
+        with:
+          files: |
+            test-files/good_1.json
+          schema-file: test-files/example.schema.json
+          schema-url: https://example.com/schema.json
       
       # Invalid file-format option
       - name: Invalid file-format option
@@ -71,6 +82,7 @@ jobs:
         env:
           MISSING_FILES_AND_FORMAT: ${{ steps.missing-files-and-file-format.outcome }}
           MISSING_SCHEMA_FILE_AND_URL: ${{ steps.missing-schema-file-and-schema-url.outcome }}
+          BOTH_SCHEMA_FILE_AND_URL: ${{ steps.both-schema-file-and-schema-url.outcome }}
           INVALID_FILE_FORMAT_OPTION: ${{ steps.invalid-file-format-option.outcome }}
           INVALID_SCHEMA_FORMAT_OPTION: ${{ steps.invalid-schema-format-option.outcome }}
           INVALID_OUTPUT_FORMAT_OPTION: ${{ steps.invalid-output-format-option.outcome }}
@@ -86,6 +98,7 @@ jobs:
           # Flip results, failure -> success
           [ "$MISSING_FILES_AND_FORMAT" = "failure" ] && MISSING_FILES_AND_FORMAT="success"
           [ "$MISSING_SCHEMA_FILE_AND_URL" = "failure" ] && MISSING_SCHEMA_FILE_AND_URL="success"
+          [ "$BOTH_SCHEMA_FILE_AND_URL" = "failure" ] && BOTH_SCHEMA_FILE_AND_URL="success"
           [ "$INVALID_FILE_FORMAT_OPTION" = "failure" ] && INVALID_FILE_FORMAT_OPTION="success"
           [ "$INVALID_SCHEMA_FORMAT_OPTION" = "failure" ] && INVALID_SCHEMA_FORMAT_OPTION="success"
           [ "$INVALID_OUTPUT_FORMAT_OPTION" = "failure" ] && INVALID_OUTPUT_FORMAT_OPTION="success"
@@ -93,6 +106,7 @@ jobs:
           # Show results in GitHub step summary
           echo "$(pick_emoji $MISSING_FILES_AND_FORMAT) Missing files and file-format" >> $GITHUB_STEP_SUMMARY
           echo "$(pick_emoji $MISSING_SCHEMA_FILE_AND_URL) Missing schema-file and schema-url" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $BOTH_SCHEMA_FILE_AND_URL) Both schema-file and schema-url" >> $GITHUB_STEP_SUMMARY
           echo "$(pick_emoji $INVALID_FILE_FORMAT_OPTION) Invalid file-format option" >> $GITHUB_STEP_SUMMARY
           echo "$(pick_emoji $INVALID_SCHEMA_FORMAT_OPTION) Invalid schema-format option" >> $GITHUB_STEP_SUMMARY
           echo "$(pick_emoji $INVALID_OUTPUT_FORMAT_OPTION) Invalid output-format option" >> $GITHUB_STEP_SUMMARY
@@ -100,6 +114,7 @@ jobs:
           # Validate that all tests failed
           if [ "$MISSING_FILES_AND_FORMAT" != "success" ] || \
              [ "$MISSING_SCHEMA_FILE_AND_URL" != "success" ] || \
+             [ "$BOTH_SCHEMA_FILE_AND_URL" != "success" ] || \
              [ "$INVALID_FILE_FORMAT_OPTION" != "success" ] || \
              [ "$INVALID_SCHEMA_FORMAT_OPTION" != "success" ] || \
              [ "$INVALID_OUTPUT_FORMAT_OPTION" != "success" ]; then
