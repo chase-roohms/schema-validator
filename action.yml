@@ -16,7 +16,8 @@ inputs:
   file-format:
     description: |
       The format of the files to validate.
-      Options: json, yaml, xml
+      Options: json, yaml, xml, all
+      To validate all supported file formats, use 'all'.
       Inferred from the file extensions of inputs.files if not provided.
       Required if inputs.files is not provided.
     required: false
@@ -90,7 +91,7 @@ runs:
 
         #################### inputs with options ####################
         # Validate the file format is an accepted value
-        valid_file_formats=("json" "yaml" "xml")
+        valid_file_formats=("json" "yaml" "xml" "all")
         if [[ -n "$FILE_FORMAT" && ! " ${valid_file_formats[@]} " =~ " $FILE_FORMAT " ]]; then
           echo "::error::Invalid file format '$FILE_FORMAT'. Valid options are: ${valid_file_formats[*]}"
           exit 1
@@ -165,6 +166,7 @@ runs:
           exit 1
         fi
     
+    ############################# Validation Steps #############################
     - name: Setup Python
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
       with:
