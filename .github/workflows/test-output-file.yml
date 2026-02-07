@@ -260,7 +260,7 @@ jobs:
           echo "✅ Failing validation test failed as expected"
 
   test-output-format-xml:
-    name: Test XML Output Format
+    name: Test Output Format with XML Files
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
