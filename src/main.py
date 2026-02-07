@@ -96,7 +96,8 @@ def main():
     if len(error_dict) > 0:
         print("Validation errors found:")
         for file_path, error in error_dict.items():
-            print(f"{file_path}: {error}")
+            print(f"::error::{file_path} not valid")
+            print(error)
         quit(1)
 
 if __name__ == "__main__":
