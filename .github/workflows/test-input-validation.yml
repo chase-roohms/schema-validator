@@ -176,7 +176,7 @@ jobs:
         with:
           files: |
             test-files/good_1.json
-          schema-url: https://example.com/non-existent.schema.json
+          schema-url: https://this-domain-definitely-does-not-exist-99999.com/schema.json
           
       - name: Collect results
         id: collect-results

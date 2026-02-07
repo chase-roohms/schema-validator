@@ -129,14 +129,14 @@ runs:
       run: |
         # Iterate through inputs.files
         if [[ -n "$FILES" ]]; then
-          IFS=$'\n' read -r -d '' -a files <<< "$FILES"
-          for file in "${files[@]}"; do
+          while IFS= read -r file; do
+            [[ -n "$file" ]] || continue  # Skip empty lines
             # Check if the file exists
             if [[ ! -f "$file" ]]; then
               echo "::error::File not found: $file."
               exit 1
             fi
-          done
+          done <<< "$FILES"
         fi
     
     - name: Validate Schema File Exists
