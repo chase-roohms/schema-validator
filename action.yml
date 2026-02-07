@@ -76,6 +76,7 @@ runs:
         OUTPUT_FORMAT: ${{ inputs.output-format }}
         OUTPUT_FILE: ${{ inputs.output-file }}
       run: |
+        # Input Validation
         ###################### required inputs ######################
         # Validate that either 'files' or 'file-format' is provided
         if [[ -z "$FILES" && -z "$FILE_FORMAT" ]]; then
