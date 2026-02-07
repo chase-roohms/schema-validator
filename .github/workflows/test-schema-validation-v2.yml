@@ -13,7 +13,8 @@ permissions:
   contents: read
 
 jobs:
-  test-passing-schema-file-validation:
+  test-passing-json-schema-validation:
+    name: JSON Types - Passing Validation
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -30,6 +31,16 @@ jobs:
             test-files/toml/good_1.toml
             test-files/toml/good_2.toml
             test-files/toml/good_3.toml
+          - |
+            test-files/toml/good_1.toml
+            test-files/toml/good_2.toml
+            test-files/toml/good_3.toml
+            test-files/yaml/good_1.yaml
+            test-files/yaml/good_2.yaml
+            test-files/yaml/good_3.yaml
+            test-files/json/good_1.json
+            test-files/json/good_2.json
+            test-files/json/good_3.json
         schemas:
           - test-files/json/person.schema.json
           - test-files/yaml/person.schema.yaml
@@ -42,7 +53,60 @@ jobs:
           persist-credentials: false
       
       - name: Test Schema Validation
+        id: test-schema
         uses: ./
         with:
           files: ${{ matrix.files }}
           schema-file: ${{ matrix.schemas }}
+    
+  
+  test-failing-json-schema-validation:
+    name: JSON Types - Failing Validation
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        files:
+          - |
+            test-files/json/bad_1.json
+            test-files/json/bad_2.json
+            test-files/json/bad_3.json
+          - |
+            test-files/yaml/bad_1.yaml
+            test-files/yaml/bad_2.yaml
+            test-files/yaml/bad_3.yaml
+          - |
+            test-files/toml/bad_1.toml
+            test-files/toml/bad_2.toml
+            test-files/toml/bad_3.toml
+          - |
+            test-files/toml/bad_1.toml
+            test-files/toml/bad_2.toml
+            test-files/toml/bad_3.toml
+            test-files/yaml/bad_1.yaml
+            test-files/yaml/bad_2.yaml
+            test-files/yaml/bad_3.yaml
+            test-files/json/bad_1.json
+            test-files/json/bad_2.json
+            test-files/json/bad_3.json
+        schemas:
+          - test-files/json/person.schema.json
+          - test-files/yaml/person.schema.yaml
+          - test-files/toml/person.schema.toml
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      
+      - name: Test Schema Validation
+        id: test-schema
+        continue-on-error: true
+        uses: ./
+        with:
+          files: ${{ matrix.files }}
+          schema-file: ${{ matrix.schemas }}
+      
+      - name: Fail if any validation passed
+        if: ${{ steps.test-schema.outcome == 'success' }}
+        run: exit 1
