@@ -110,3 +110,60 @@ jobs:
       - name: Fail if any validation passed
         if: ${{ steps.test-schema.outcome == 'success' }}
         run: exit 1
+    
+  test-passing-xml-schema-validation:
+    name: XML Types - Passing Validation
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        files:
+          - |
+            test-files/xml/good_1.xml
+            test-files/xml/good_2.xml
+            test-files/xml/good_3.xml
+        schemas:
+          - test-files/xml/person.schema.xml
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      
+      - name: Test Schema Validation
+        id: test-schema
+        uses: ./
+        with:
+          files: ${{ matrix.files }}
+          schema-file: ${{ matrix.schemas }}
+    
+  test-failing-xml-schema-validation:
+    name: XML Types - Failing Validation
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        files:
+          - |
+            test-files/xml/bad_1.xml
+            test-files/xml/bad_2.xml
+            test-files/xml/bad_3.xml
+        schemas:
+          - test-files/xml/person.schema.xml
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      
+      - name: Test Schema Validation
+        id: test-schema
+        continue-on-error: true
+        uses: ./
+        with:
+          files: ${{ matrix.files }}
+          schema-file: ${{ matrix.schemas }}
+      
+      - name: Fail if any validation passed
+        if: ${{ steps.test-schema.outcome == 'success' }}
+        run: exit 1
