@@ -84,14 +84,14 @@ def main():
                 with open(file_path, 'rb') as xml_file:
                     xml_doc = etree.parse(xml_file)
                 if schema_data.validate(xml_doc):
-                    reporter.add_result(file_path, True, "Valid")
+                    reporter.add_result(file_path, True, "")
                 else:
                     error_dict[file_path] = schema_data.error_log
                     reporter.add_result(file_path, False, str(schema_data.error_log))
             else:
                 # Validate using JSON Schema (works for JSON and YAML after parsing)
                 validate(instance=file_data, schema=schema_data)
-                reporter.add_result(file_path, True, "Valid")
+                reporter.add_result(file_path, True, "")
         except (SchemaError, etree.DocumentInvalid) as e:
             raise
         except ValidationError as e:
@@ -105,7 +105,7 @@ def main():
         quit(1)
     else:
         print("All files are valid.")
-        reporter.print_results(errors_only=False)
+        reporter.print_results(errors_only=False, gha_commands=False)
 
 if __name__ == "__main__":
     main()
