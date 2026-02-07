@@ -37,7 +37,7 @@ def main():
         format_extensions = {
             'yaml': ['.yaml', '.yml'],
             'json': ['.json'],
-            'xml': ['.xml']
+            'xml': ['.xml', '.xsd']
         }
         extensions = format_extensions.get(vars_args['file_format'], [f".{vars_args['file_format']}"])
         vars_args['files'] = [f for f in os.listdir('.') if any(f.endswith(ext) for ext in extensions)]
