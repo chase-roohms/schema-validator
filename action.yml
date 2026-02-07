@@ -42,7 +42,7 @@ inputs:
       The format of the validation results.
       Options: json, text
     required: false
-    default: text
+    default: json
   output-file:
     # Used instead of outputs since there is a chance the output size could be too
     # large for GitHub Actions to handle as an output. (Max 1 MB)
