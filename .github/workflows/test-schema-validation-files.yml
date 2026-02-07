@@ -17,6 +17,7 @@ jobs:
     name: JSON Types - Passing Validation
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false  # Let all matrix combinations run regardless of fails
       matrix:
         files:
           - |
@@ -70,6 +71,7 @@ jobs:
     name: JSON Types - Failing Validation
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false  # Let all matrix combinations run regardless of fails
       matrix:
         files:
           - |
@@ -121,6 +123,7 @@ jobs:
     name: XML Types - Passing Validation
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false  # Let all matrix combinations run regardless of fails
       matrix:
         files:
           - |
@@ -154,6 +157,7 @@ jobs:
     name: XML Types - Failing Validation
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false  # Let all matrix combinations run regardless of fails
       matrix:
         files:
           - |
