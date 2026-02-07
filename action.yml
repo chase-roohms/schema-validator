@@ -111,6 +111,82 @@ runs:
           echo "::error::Invalid output format '$OUTPUT_FORMAT'. Valid options are: ${valid_output_formats[*]}"
           exit 1
         fi
+
+        ################ schema and file format compatibility ################
+        # Determine schema format (from explicit input or infer from file/URL)
+        INFERRED_SCHEMA_FORMAT=""
+        if [[ -n "$SCHEMA_FORMAT" ]]; then
+          INFERRED_SCHEMA_FORMAT="$SCHEMA_FORMAT"
+        elif [[ -n "$SCHEMA_FILE" ]]; then
+          # Infer from file extension
+          if [[ "$SCHEMA_FILE" =~ \.xsd$ ]]; then
+            INFERRED_SCHEMA_FORMAT="xml"
+          elif [[ "$SCHEMA_FILE" =~ \.(json|yaml|yml)$ ]]; then
+            ext="${SCHEMA_FILE##*.}"
+            if [[ "$ext" == "yml" ]]; then
+              INFERRED_SCHEMA_FORMAT="yaml"
+            else
+              INFERRED_SCHEMA_FORMAT="$ext"
+            fi
+          fi
+        elif [[ -n "$SCHEMA_URL" ]]; then
+          # Infer from URL extension
+          if [[ "$SCHEMA_URL" =~ \.xsd($|\?) ]]; then
+            INFERRED_SCHEMA_FORMAT="xml"
+          elif [[ "$SCHEMA_URL" =~ \.(json|yaml|yml)($|\?) ]]; then
+            if [[ "$SCHEMA_URL" =~ \.yml($|\?) ]]; then
+              INFERRED_SCHEMA_FORMAT="yaml"
+            elif [[ "$SCHEMA_URL" =~ \.yaml($|\?) ]]; then
+              INFERRED_SCHEMA_FORMAT="yaml"
+            elif [[ "$SCHEMA_URL" =~ \.json($|\?) ]]; then
+              INFERRED_SCHEMA_FORMAT="json"
+            fi
+          fi
+        fi
+
+        # Determine file formats to validate
+        INFERRED_FILE_FORMATS=()
+        if [[ -n "$FILES" ]]; then
+          # Extract unique file extensions from provided files
+          while IFS= read -r file; do
+            [[ -n "$file" ]] || continue
+            if [[ "$file" =~ \.xml$ ]]; then
+              INFERRED_FILE_FORMATS+=("xml")
+            elif [[ "$file" =~ \.(json|yaml|yml)$ ]]; then
+              INFERRED_FILE_FORMATS+=("json_yaml")
+            fi
+          done <<< "$FILES"
+          # Remove duplicates
+          INFERRED_FILE_FORMATS=($(printf '%s\n' "${INFERRED_FILE_FORMATS[@]}" | sort -u))
+        elif [[ -n "$FILE_FORMAT" ]]; then
+          if [[ "$FILE_FORMAT" == "xml" ]]; then
+            INFERRED_FILE_FORMATS=("xml")
+          elif [[ "$FILE_FORMAT" == "json" || "$FILE_FORMAT" == "yaml" ]]; then
+            INFERRED_FILE_FORMATS=("json_yaml")
+          elif [[ "$FILE_FORMAT" == "all" ]]; then
+            INFERRED_FILE_FORMATS=("xml" "json_yaml")
+          fi
+        fi
+
+        # Validate compatibility: XML schemas (.xsd) only work with XML files
+        # JSON/YAML schemas are interchangeable
+        if [[ "$INFERRED_SCHEMA_FORMAT" == "xml" ]]; then
+          # XML/XSD schema requires XML files only
+          for fmt in "${INFERRED_FILE_FORMATS[@]}"; do
+            if [[ "$fmt" == "json_yaml" ]]; then
+              echo "::error::XML schema (.xsd) cannot be used to validate JSON or YAML files. XML schemas can only validate XML files."
+              exit 1
+            fi
+          done
+        elif [[ "$INFERRED_SCHEMA_FORMAT" == "json" || "$INFERRED_SCHEMA_FORMAT" == "yaml" ]]; then
+          # JSON/YAML schema cannot validate XML files
+          for fmt in "${INFERRED_FILE_FORMATS[@]}"; do
+            if [[ "$fmt" == "xml" ]]; then
+              echo "::error::JSON/YAML schema cannot be used to validate XML files. Use an XSD schema (.xsd) for XML validation."
+              exit 1
+            fi
+          done
+        fi
     
     - name: Validate Repository was Checked Out
       id: validate-checkout

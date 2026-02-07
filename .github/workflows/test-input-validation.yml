@@ -229,3 +229,221 @@ jobs:
             echo "::error::One or more tests did not fail as expected"
             exit 1
           fi
+
+  test-schema-file-compatibility-fails:
+    name: Test Schema and File Format Compatibility Failure Scenarios
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      
+      # XML/XSD schema with JSON file
+      - name: XML schema with JSON file
+        id: xml-schema-json-file
+        uses: ./
+        continue-on-error: true
+        with:
+          files: |
+            test-files/json/good_1.json
+          schema-file: test-files/xml/person.schema.xsd
+      
+      # XML/XSD schema with YAML file
+      - name: XML schema with YAML file
+        id: xml-schema-yaml-file
+        uses: ./
+        continue-on-error: true
+        with:
+          files: |
+            test-files/yaml/good_1.yaml
+          schema-file: test-files/xml/person.schema.xsd
+      
+      # JSON schema with XML file
+      - name: JSON schema with XML file
+        id: json-schema-xml-file
+        uses: ./
+        continue-on-error: true
+        with:
+          files: |
+            test-files/xml/good_1.xml
+          schema-file: test-files/json/person.schema.json
+      
+      # YAML schema with XML file
+      - name: YAML schema with XML file
+        id: yaml-schema-xml-file
+        uses: ./
+        continue-on-error: true
+        with:
+          files: |
+            test-files/xml/good_1.xml
+          schema-file: test-files/yaml/person.schema.yaml
+      
+      # XML/XSD schema URL with JSON file
+      - name: XML schema URL with JSON file
+        id: xml-schema-url-json-file
+        uses: ./
+        continue-on-error: true
+        with:
+          files: |
+            test-files/json/good_1.json
+          schema-url: https://raw.githubusercontent.com/chase-roohms/schema-validator/refs/heads/main/test-files/xml/person.schema.xsd
+      
+      # JSON schema URL with XML file
+      - name: JSON schema URL with XML file
+        id: json-schema-url-xml-file
+        uses: ./
+        continue-on-error: true
+        with:
+          files: |
+            test-files/xml/good_1.xml
+          schema-url: https://raw.githubusercontent.com/chase-roohms/schema-validator/refs/heads/main/test-files/json/person.schema.json
+      
+      # XML/XSD schema with json file-format
+      - name: XML schema with json file-format
+        id: xml-schema-json-format
+        uses: ./
+        continue-on-error: true
+        with:
+          file-format: json
+          schema-file: test-files/xml/person.schema.xsd
+      
+      # XML/XSD schema with yaml file-format
+      - name: XML schema with yaml file-format
+        id: xml-schema-yaml-format
+        uses: ./
+        continue-on-error: true
+        with:
+          file-format: yaml
+          schema-file: test-files/xml/person.schema.xsd
+      
+      # JSON schema with xml file-format
+      - name: JSON schema with xml file-format
+        id: json-schema-xml-format
+        uses: ./
+        continue-on-error: true
+        with:
+          file-format: xml
+          schema-file: test-files/json/person.schema.json
+      
+      # XML/XSD schema with 'all' file-format (includes json/yaml)
+      - name: XML schema with all file-format
+        id: xml-schema-all-format
+        uses: ./
+        continue-on-error: true
+        with:
+          file-format: all
+          schema-file: test-files/xml/person.schema.xsd
+      
+      # JSON schema with 'all' file-format (includes xml)
+      - name: JSON schema with all file-format
+        id: json-schema-all-format
+        uses: ./
+        continue-on-error: true
+        with:
+          file-format: all
+          schema-file: test-files/json/person.schema.json
+      
+      # Mixed files: JSON and XML with JSON schema
+      - name: JSON schema with mixed JSON and XML files
+        id: json-schema-mixed-files
+        uses: ./
+        continue-on-error: true
+        with:
+          files: |
+            test-files/json/good_1.json
+            test-files/xml/good_1.xml
+          schema-file: test-files/json/person.schema.json
+      
+      # Mixed files: JSON and XML with XML schema
+      - name: XML schema with mixed JSON and XML files
+        id: xml-schema-mixed-files
+        uses: ./
+        continue-on-error: true
+        with:
+          files: |
+            test-files/json/good_1.json
+            test-files/xml/good_1.xml
+          schema-file: test-files/xml/person.schema.xsd
+      
+      - name: Collect results
+        id: collect-results
+        env:
+          XML_SCHEMA_JSON_FILE: ${{ steps.xml-schema-json-file.outcome }}
+          XML_SCHEMA_YAML_FILE: ${{ steps.xml-schema-yaml-file.outcome }}
+          JSON_SCHEMA_XML_FILE: ${{ steps.json-schema-xml-file.outcome }}
+          YAML_SCHEMA_XML_FILE: ${{ steps.yaml-schema-xml-file.outcome }}
+          XML_SCHEMA_URL_JSON_FILE: ${{ steps.xml-schema-url-json-file.outcome }}
+          JSON_SCHEMA_URL_XML_FILE: ${{ steps.json-schema-url-xml-file.outcome }}
+          XML_SCHEMA_JSON_FORMAT: ${{ steps.xml-schema-json-format.outcome }}
+          XML_SCHEMA_YAML_FORMAT: ${{ steps.xml-schema-yaml-format.outcome }}
+          JSON_SCHEMA_XML_FORMAT: ${{ steps.json-schema-xml-format.outcome }}
+          XML_SCHEMA_ALL_FORMAT: ${{ steps.xml-schema-all-format.outcome }}
+          JSON_SCHEMA_ALL_FORMAT: ${{ steps.json-schema-all-format.outcome }}
+          JSON_SCHEMA_MIXED_FILES: ${{ steps.json-schema-mixed-files.outcome }}
+          XML_SCHEMA_MIXED_FILES: ${{ steps.xml-schema-mixed-files.outcome }}
+        run: |
+          function pick_emoji() {
+            case "$1" in
+              success) echo "✅" ;;
+              failure) echo "❌" ;;
+              *) echo "❓" ;;
+            esac
+          }
+
+          # Flip results, failure -> success
+          [ "$XML_SCHEMA_JSON_FILE" = "failure" ] && XML_SCHEMA_JSON_FILE="success"
+          [ "$XML_SCHEMA_YAML_FILE" = "failure" ] && XML_SCHEMA_YAML_FILE="success"
+          [ "$JSON_SCHEMA_XML_FILE" = "failure" ] && JSON_SCHEMA_XML_FILE="success"
+          [ "$YAML_SCHEMA_XML_FILE" = "failure" ] && YAML_SCHEMA_XML_FILE="success"
+          [ "$XML_SCHEMA_URL_JSON_FILE" = "failure" ] && XML_SCHEMA_URL_JSON_FILE="success"
+          [ "$JSON_SCHEMA_URL_XML_FILE" = "failure" ] && JSON_SCHEMA_URL_XML_FILE="success"
+          [ "$XML_SCHEMA_JSON_FORMAT" = "failure" ] && XML_SCHEMA_JSON_FORMAT="success"
+          [ "$XML_SCHEMA_YAML_FORMAT" = "failure" ] && XML_SCHEMA_YAML_FORMAT="success"
+          [ "$JSON_SCHEMA_XML_FORMAT" = "failure" ] && JSON_SCHEMA_XML_FORMAT="success"
+          [ "$XML_SCHEMA_ALL_FORMAT" = "failure" ] && XML_SCHEMA_ALL_FORMAT="success"
+          [ "$JSON_SCHEMA_ALL_FORMAT" = "failure" ] && JSON_SCHEMA_ALL_FORMAT="success"
+          [ "$JSON_SCHEMA_MIXED_FILES" = "failure" ] && JSON_SCHEMA_MIXED_FILES="success"
+          [ "$XML_SCHEMA_MIXED_FILES" = "failure" ] && XML_SCHEMA_MIXED_FILES="success"
+          
+          # Show results in GitHub step summary
+          echo "## Schema/File Format Compatibility Tests" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Individual File Tests" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $XML_SCHEMA_JSON_FILE) XML schema with JSON file" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $XML_SCHEMA_YAML_FILE) XML schema with YAML file" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $JSON_SCHEMA_XML_FILE) JSON schema with XML file" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $YAML_SCHEMA_XML_FILE) YAML schema with XML file" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Schema URL Tests" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $XML_SCHEMA_URL_JSON_FILE) XML schema URL with JSON file" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $JSON_SCHEMA_URL_XML_FILE) JSON schema URL with XML file" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### File Format Tests" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $XML_SCHEMA_JSON_FORMAT) XML schema with json file-format" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $XML_SCHEMA_YAML_FORMAT) XML schema with yaml file-format" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $JSON_SCHEMA_XML_FORMAT) JSON schema with xml file-format" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $XML_SCHEMA_ALL_FORMAT) XML schema with all file-format" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $JSON_SCHEMA_ALL_FORMAT) JSON schema with all file-format" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Mixed File Tests" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $JSON_SCHEMA_MIXED_FILES) JSON schema with mixed JSON and XML files" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $XML_SCHEMA_MIXED_FILES) XML schema with mixed JSON and XML files" >> $GITHUB_STEP_SUMMARY
+          
+          # Validate that all tests failed
+          if [ "$XML_SCHEMA_JSON_FILE" != "success" ] || \
+             [ "$XML_SCHEMA_YAML_FILE" != "success" ] || \
+             [ "$JSON_SCHEMA_XML_FILE" != "success" ] || \
+             [ "$YAML_SCHEMA_XML_FILE" != "success" ] || \
+             [ "$XML_SCHEMA_URL_JSON_FILE" != "success" ] || \
+             [ "$JSON_SCHEMA_URL_XML_FILE" != "success" ] || \
+             [ "$XML_SCHEMA_JSON_FORMAT" != "success" ] || \
+             [ "$XML_SCHEMA_YAML_FORMAT" != "success" ] || \
+             [ "$JSON_SCHEMA_XML_FORMAT" != "success" ] || \
+             [ "$XML_SCHEMA_ALL_FORMAT" != "success" ] || \
+             [ "$JSON_SCHEMA_ALL_FORMAT" != "success" ] || \
+             [ "$JSON_SCHEMA_MIXED_FILES" != "success" ] || \
+             [ "$XML_SCHEMA_MIXED_FILES" != "success" ]; then
+            echo "::error::One or more compatibility tests did not fail as expected"
+            exit 1
+          fi
