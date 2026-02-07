@@ -1,0 +1,444 @@
+name: Test Output File and Format
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test-output-format-json:
+    name: Test JSON Output Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Test JSON Output with Passing Validation
+        uses: ./
+        with:
+          files: |
+            test-files/json/good_1.json
+            test-files/json/good_2.json
+            test-files/json/good_3.json
+          schema-file: test-files/json/person.schema.json
+          output-format: json
+          output-file: ${{ runner.temp }}/validation-results-pass.json
+      
+      - name: Validate JSON Output File Exists (Passing)
+        shell: bash
+        run: |
+          if [[ ! -f "${{ runner.temp }}/validation-results-pass.json" ]]; then
+            echo "::error::JSON output file not found: ${{ runner.temp }}/validation-results-pass.json"
+            exit 1
+          fi
+          echo "✅ JSON output file exists"
+      
+      - name: Validate JSON Output is Valid JSON (Passing)
+        shell: bash
+        run: |
+          if ! jq empty "${{ runner.temp }}/validation-results-pass.json" 2>/dev/null; then
+            echo "::error::JSON output file is not valid JSON"
+            exit 1
+          fi
+          echo "✅ JSON output file is valid JSON"
+      
+      - name: Validate JSON Output Content (Passing)
+        shell: bash
+        run: |
+          # Check that all files are marked as passed
+          passed_count=$(jq '[.[] | select(.passed == true)] | length' "${{ runner.temp }}/validation-results-pass.json")
+          total_count=$(jq 'length' "${{ runner.temp }}/validation-results-pass.json")
+          
+          if [[ "$passed_count" != "3" ]]; then
+            echo "::error::Expected 3 passed files, got $passed_count"
+            exit 1
+          fi
+          
+          if [[ "$total_count" != "3" ]]; then
+            echo "::error::Expected 3 total files, got $total_count"
+            exit 1
+          fi
+          
+          echo "✅ JSON output content is correct for passing validation"
+      
+      - name: Test JSON Output with Failing Validation
+        id: test-json-failing
+        uses: ./
+        continue-on-error: true
+        with:
+          files: |
+            test-files/json/bad_1.json
+            test-files/json/bad_2.json
+            test-files/json/bad_3.json
+          schema-file: test-files/json/person.schema.json
+          output-format: json
+          output-file: ${{ runner.temp }}/validation-results-fail.json
+      
+      - name: Validate JSON Output File Exists (Failing)
+        shell: bash
+        run: |
+          if [[ ! -f "${{ runner.temp }}/validation-results-fail.json" ]]; then
+            echo "::error::JSON output file not found: ${{ runner.temp }}/validation-results-fail.json"
+            exit 1
+          fi
+          echo "✅ JSON output file exists"
+      
+      - name: Validate JSON Output is Valid JSON (Failing)
+        shell: bash
+        run: |
+          if ! jq empty "${{ runner.temp }}/validation-results-fail.json" 2>/dev/null; then
+            echo "::error::JSON output file is not valid JSON"
+            exit 1
+          fi
+          echo "✅ JSON output file is valid JSON"
+      
+      - name: Validate JSON Output Content (Failing)
+        shell: bash
+        run: |
+          # Check that all files are marked as failed
+          failed_count=$(jq '[.[] | select(.passed == false)] | length' "${{ runner.temp }}/validation-results-fail.json")
+          total_count=$(jq 'length' "${{ runner.temp }}/validation-results-fail.json")
+          
+          if [[ "$failed_count" != "3" ]]; then
+            echo "::error::Expected 3 failed files, got $failed_count"
+            exit 1
+          fi
+          
+          if [[ "$total_count" != "3" ]]; then
+            echo "::error::Expected 3 total files, got $total_count"
+            exit 1
+          fi
+          
+          # Check that each failed file has notes
+          notes_count=$(jq '[.[] | select(.notes != "")] | length' "${{ runner.temp }}/validation-results-fail.json")
+          if [[ "$notes_count" != "3" ]]; then
+            echo "::error::Expected 3 files with notes, got $notes_count"
+            exit 1
+          fi
+          
+          echo "✅ JSON output content is correct for failing validation"
+      
+      - name: Verify Failing Test Failed
+        shell: bash
+        run: |
+          if [[ "${{ steps.test-json-failing.outcome }}" != "failure" ]]; then
+            echo "::error::Expected failing validation test to fail"
+            exit 1
+          fi
+          echo "✅ Failing validation test failed as expected"
+
+  test-output-format-text:
+    name: Test Text Output Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Test Text Output with Passing Validation
+        uses: ./
+        with:
+          files: |
+            test-files/yaml/good_1.yaml
+            test-files/yaml/good_2.yaml
+            test-files/yaml/good_3.yaml
+          schema-file: test-files/yaml/person.schema.yaml
+          output-format: text
+          output-file: ${{ runner.temp }}/validation-results-pass.txt
+      
+      - name: Validate Text Output File Exists (Passing)
+        shell: bash
+        run: |
+          if [[ ! -f "${{ runner.temp }}/validation-results-pass.txt" ]]; then
+            echo "::error::Text output file not found: ${{ runner.temp }}/validation-results-pass.txt"
+            exit 1
+          fi
+          echo "✅ Text output file exists"
+      
+      - name: Validate Text Output Content (Passing)
+        shell: bash
+        run: |
+          # Check that file is not empty
+          if [[ ! -s "${{ runner.temp }}/validation-results-pass.txt" ]]; then
+            echo "::error::Text output file is empty"
+            exit 1
+          fi
+          
+          # Check that all files are marked as valid
+          valid_count=$(grep -c ": valid" "${{ runner.temp }}/validation-results-pass.txt" || true)
+          not_valid_count=$(grep -c ": not valid" "${{ runner.temp }}/validation-results-pass.txt" || true)
+          
+          if [[ "$valid_count" != "3" ]]; then
+            echo "::error::Expected 3 valid files, got $valid_count"
+            cat "${{ runner.temp }}/validation-results-pass.txt"
+            exit 1
+          fi
+          
+          if [[ "$not_valid_count" != "0" ]]; then
+            echo "::error::Expected 0 invalid files, got $not_valid_count"
+            cat "${{ runner.temp }}/validation-results-pass.txt"
+            exit 1
+          fi
+          
+          echo "✅ Text output content is correct for passing validation"
+      
+      - name: Test Text Output with Failing Validation
+        id: test-text-failing
+        uses: ./
+        continue-on-error: true
+        with:
+          files: |
+            test-files/yaml/bad_1.yaml
+            test-files/yaml/bad_2.yaml
+            test-files/yaml/bad_3.yaml
+          schema-file: test-files/yaml/person.schema.yaml
+          output-format: text
+          output-file: ${{ runner.temp }}/validation-results-fail.txt
+      
+      - name: Validate Text Output File Exists (Failing)
+        shell: bash
+        run: |
+          if [[ ! -f "${{ runner.temp }}/validation-results-fail.txt" ]]; then
+            echo "::error::Text output file not found: ${{ runner.temp }}/validation-results-fail.txt"
+            exit 1
+          fi
+          echo "✅ Text output file exists"
+      
+      - name: Validate Text Output Content (Failing)
+        shell: bash
+        run: |
+          # Check that file is not empty
+          if [[ ! -s "${{ runner.temp }}/validation-results-fail.txt" ]]; then
+            echo "::error::Text output file is empty"
+            exit 1
+          fi
+          
+          # Check that all files are marked as not valid
+          valid_count=$(grep -c ": valid" "${{ runner.temp }}/validation-results-fail.txt" || true)
+          not_valid_count=$(grep -c ": not valid" "${{ runner.temp }}/validation-results-fail.txt" || true)
+          
+          if [[ "$not_valid_count" != "3" ]]; then
+            echo "::error::Expected 3 invalid files, got $not_valid_count"
+            cat "${{ runner.temp }}/validation-results-fail.txt"
+            exit 1
+          fi
+          
+          if [[ "$valid_count" != "0" ]]; then
+            echo "::error::Expected 0 valid files, got $valid_count"
+            cat "${{ runner.temp }}/validation-results-fail.txt"
+            exit 1
+          fi
+          
+          # Check that error messages are present (each file should have notes)
+          # Each failed file should have at least 2 lines (file status + error notes)
+          line_count=$(wc -l < "${{ runner.temp }}/validation-results-fail.txt")
+          if [[ "$line_count" -lt "6" ]]; then
+            echo "::error::Expected at least 6 lines (3 files + 3 error messages), got $line_count"
+            cat "${{ runner.temp }}/validation-results-fail.txt"
+            exit 1
+          fi
+          
+          echo "✅ Text output content is correct for failing validation"
+      
+      - name: Verify Failing Test Failed
+        shell: bash
+        run: |
+          if [[ "${{ steps.test-text-failing.outcome }}" != "failure" ]]; then
+            echo "::error::Expected failing validation test to fail"
+            exit 1
+          fi
+          echo "✅ Failing validation test failed as expected"
+
+  test-output-format-xml:
+    name: Test XML Output Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Test JSON Output with XML Validation
+        uses: ./
+        with:
+          files: |
+            test-files/xml/good_1.xml
+            test-files/xml/good_2.xml
+          schema-file: test-files/xml/person.schema.xsd
+          output-format: json
+          output-file: ${{ runner.temp }}/xml-validation-results.json
+      
+      - name: Validate JSON Output with XML Files
+        shell: bash
+        run: |
+          # Validate file exists
+          if [[ ! -f "${{ runner.temp }}/xml-validation-results.json" ]]; then
+            echo "::error::JSON output file not found"
+            exit 1
+          fi
+          
+          # Validate JSON is valid
+          if ! jq empty "${{ runner.temp }}/xml-validation-results.json" 2>/dev/null; then
+            echo "::error::JSON output file is not valid JSON"
+            exit 1
+          fi
+          
+          # Check that all XML files passed
+          passed_count=$(jq '[.[] | select(.passed == true)] | length' "${{ runner.temp }}/xml-validation-results.json")
+          if [[ "$passed_count" != "2" ]]; then
+            echo "::error::Expected 2 passed files, got $passed_count"
+            exit 1
+          fi
+          
+          echo "✅ JSON output works correctly with XML validation"
+
+  test-default-output-file:
+    name: Test Default Output File Location
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Test Default Output File Location
+        uses: ./
+        with:
+          files: test-files/json/good_1.json
+          schema-file: test-files/json/person.schema.json
+          output-format: json
+      
+      - name: Validate Default Output File Exists
+        shell: bash
+        run: |
+          # Default location is ${{ runner.temp }}/validation-results
+          if [[ ! -f "${{ runner.temp }}/validation-results" ]]; then
+            echo "::error::Default output file not found at ${{ runner.temp }}/validation-results"
+            exit 1
+          fi
+          echo "✅ Default output file location works correctly"
+      
+      - name: Validate Default Output is Valid JSON
+        shell: bash
+        run: |
+          if ! jq empty "${{ runner.temp }}/validation-results" 2>/dev/null; then
+            echo "::error::Default output file is not valid JSON"
+            exit 1
+          fi
+          echo "✅ Default output file is valid JSON"
+
+  test-output-file-paths:
+    name: Test Various Output File Paths
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Test Nested Directory Output
+        uses: ./
+        with:
+          files: test-files/json/good_1.json
+          schema-file: test-files/json/person.schema.json
+          output-format: json
+          output-file: ${{ runner.temp }}/nested/dir/results.json
+      
+      - name: Validate Nested Directory Output
+        shell: bash
+        run: |
+          if [[ ! -f "${{ runner.temp }}/nested/dir/results.json" ]]; then
+            echo "::error::Nested directory output file not found"
+            exit 1
+          fi
+          echo "✅ Nested directory output works correctly"
+      
+      - name: Test Relative Path Output
+        uses: ./
+        with:
+          files: test-files/json/good_1.json
+          schema-file: test-files/json/person.schema.json
+          output-format: text
+          output-file: ./validation-output.txt
+      
+      - name: Validate Relative Path Output
+        shell: bash
+        run: |
+          if [[ ! -f "./validation-output.txt" ]]; then
+            echo "::error::Relative path output file not found"
+            exit 1
+          fi
+          
+          # Check it's valid text format
+          if ! grep -q ": valid" "./validation-output.txt"; then
+            echo "::error::Relative path output file doesn't contain expected content"
+            exit 1
+          fi
+          echo "✅ Relative path output works correctly"
+
+  test-mixed-formats:
+    name: Test Mixed File Formats with Output
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Test Mixed JSON and YAML Files
+        uses: ./
+        with:
+          files: |
+            test-files/json/good_1.json
+            test-files/json/good_2.json
+            test-files/yaml/good_1.yaml
+            test-files/yaml/good_2.yaml
+          schema-file: test-files/json/person.schema.json
+          output-format: json
+          output-file: ${{ runner.temp }}/mixed-results.json
+      
+      - name: Validate Mixed Format Output
+        shell: bash
+        run: |
+          # Validate file exists and is valid JSON
+          if [[ ! -f "${{ runner.temp }}/mixed-results.json" ]]; then
+            echo "::error::Mixed format output file not found"
+            exit 1
+          fi
+          
+          if ! jq empty "${{ runner.temp }}/mixed-results.json" 2>/dev/null; then
+            echo "::error::Mixed format output is not valid JSON"
+            exit 1
+          fi
+          
+          # Check that all 4 files passed
+          passed_count=$(jq '[.[] | select(.passed == true)] | length' "${{ runner.temp }}/mixed-results.json")
+          total_count=$(jq 'length' "${{ runner.temp }}/mixed-results.json")
+          
+          if [[ "$passed_count" != "4" || "$total_count" != "4" ]]; then
+            echo "::error::Expected 4 passed files, got $passed_count out of $total_count"
+            jq '.' "${{ runner.temp }}/mixed-results.json"
+            exit 1
+          fi
+          
+          # Verify both JSON and YAML files are in the results
+          json_files=$(jq '[keys[] | select(contains(".json"))] | length' "${{ runner.temp }}/mixed-results.json")
+          yaml_files=$(jq '[keys[] | select(contains(".yaml"))] | length' "${{ runner.temp }}/mixed-results.json")
+          
+          if [[ "$json_files" != "2" || "$yaml_files" != "2" ]]; then
+            echo "::error::Expected 2 JSON and 2 YAML files in output"
+            jq 'keys' "${{ runner.temp }}/mixed-results.json"
+            exit 1
+          fi
+          
+          echo "✅ Mixed format validation output is correct"
