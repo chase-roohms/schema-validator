@@ -287,13 +287,13 @@ jobs:
           [ "$YAML_MIXED" = "failure" ] && YAML_MIXED="success"
           [ "$XML_XML" = "failure" ] && XML_XML="success"
           
-          echo "$(pick_emoji $JSON_JSON) JSON on JSON"
-          echo "$(pick_emoji $JSON_YAML) JSON on YAML"
-          echo "$(pick_emoji $JSON_MIXED) JSON on Mixed"
-          echo "$(pick_emoji $YAML_JSON) YAML on JSON"
-          echo "$(pick_emoji $YAML_YAML) YAML on YAML"
-          echo "$(pick_emoji $YAML_MIXED) YAML on Mixed"
-          echo "$(pick_emoji $XML_XML) XML on XML"
+          echo "$(pick_emoji $JSON_JSON) JSON on JSON" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $JSON_YAML) JSON on YAML" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $JSON_MIXED) JSON on Mixed" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $YAML_JSON) YAML on JSON" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $YAML_YAML) YAML on YAML" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $YAML_MIXED) YAML on Mixed" >> $GITHUB_STEP_SUMMARY
+          echo "$(pick_emoji $XML_XML) XML on XML" >> $GITHUB_STEP_SUMMARY
           
           # Validate that all tests failed
           if [ "$JSON_JSON" != "success" ] || \
