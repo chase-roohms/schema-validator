@@ -1,5 +1,8 @@
 # Schema Validator
 
+> [!NOTE]
+> Support JSON, YAML, and XML. I have plans to add functionality to validate TOML files and .env files as well.
+
 - [![Test Full Schema Validation](https://github.com/chase-roohms/schema-validator/actions/workflows/test-schema-validation.yml/badge.svg)](https://github.com/chase-roohms/schema-validator/actions/workflows/test-schema-validation.yml)
 - [![Test Input Validation](https://github.com/chase-roohms/schema-validator/actions/workflows/test-input-validation.yml/badge.svg)](https://github.com/chase-roohms/schema-validator/actions/workflows/test-input-validation.yml)
 - [![Test Output File and Format](https://github.com/chase-roohms/schema-validator/actions/workflows/test-output-file.yml/badge.svg)](https://github.com/chase-roohms/schema-validator/actions/workflows/test-output-file.yml)
