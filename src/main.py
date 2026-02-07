@@ -78,19 +78,14 @@ def main():
                 # Validate XML against XSD (schema_data is already an XMLSchema object)
                 with open(file_path, 'rb') as xml_file:
                     xml_doc = etree.parse(xml_file)
-                if schema_data.validate(xml_doc):
-                    print(f"File {file_path} is valid.")
-                else:
-                    print(f"File {file_path} is invalid: {schema_data.error_log}")
+                if not schema_data.validate(xml_doc):
                     error_dict[file_path] = schema_data.error_log
             else:
                 # Validate using JSON Schema (works for JSON and YAML after parsing)
                 validate(instance=file_data, schema=schema_data)
-                print(f"File {file_path} is valid.")
         except (SchemaError, etree.DocumentInvalid) as e:
             raise
         except ValidationError as e:
-            print(f"File {file_path} validation error: {e}")
             error_dict[file_path] = str(e)
     
     if len(error_dict) > 0:
