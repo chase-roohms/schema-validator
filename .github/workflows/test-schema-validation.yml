@@ -21,9 +21,29 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Run Schema Validator
+      - name: Test JSON on JSON
         uses: ./
         with:
           files: |
             test-files/json/good_1.json
+            test-files/json/good_2.json
+            test-files/json/good_3.json
+          schema-file: test-files/json/person.schema.json
+
+      - name: Test JSON on YAML
+        uses: ./
+        with:
+          files: |
+            test-files/yaml/good_1.yaml
+            test-files/yaml/good_2.yaml
+            test-files/yaml/good_3.yaml
+          schema-file: test-files/json/person.schema.json
+
+      - name: Test JSON on XML
+        uses: ./
+        with:
+          files: |
+            test-files/xml/good_1.xml
+            test-files/xml/good_2.xml
+            test-files/xml/good_3.xml
           schema-file: test-files/json/person.schema.json
