@@ -123,7 +123,6 @@ jobs:
             test-files/good_1.json
             test-files/non-existent.json
           schema-file: test-files/example.schema.json
-          output-format: invalid-option
       
       # Non-existent schema
       - name: Non-existent schema file
@@ -134,7 +133,6 @@ jobs:
           files: |
             test-files/good_1.json
           schema-file: test-files/non-existent.schema.json
-          output-format: invalid-option
       
       - name: Collect results
         id: collect-results
