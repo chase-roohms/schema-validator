@@ -1,7 +1,7 @@
 ---
 name: Schema Validator
 author: Chase Roohms
-description: Validate JSON, YAML, and XML files against a schema. Schemas can be provided either via file or URL.
+description: Validate JSON, YAML, TOML, and XML files against a schema. Schemas can be provided either via file or URL.
 branding:
   icon: 'align-left'
   color: 'blue'
@@ -16,7 +16,7 @@ inputs:
   file-format:
     description: |
       The format of the files to validate.
-      Options: json, yaml, xml, all
+      Options: json, yaml, xml, toml
       To validate all supported file formats, use 'all'.
       Inferred from the file extensions of inputs.files if not provided.
       Required if inputs.files is not provided.
@@ -34,7 +34,7 @@ inputs:
   schema-format:
     description: |
       The format of the schema.
-      Options: json, yaml, xml
+      Options: json, yaml, xml, toml
       Will be inferred from the file extension if not provided.
     required: false
   output-format:
@@ -105,14 +105,14 @@ runs:
 
         #################### inputs with options ####################
         # Validate the file format is an accepted value
-        valid_file_formats=("json" "yaml" "xml" "all")
+        valid_file_formats=("json" "yaml" "xml" "toml")
         if [[ -n "$FILE_FORMAT" && ! " ${valid_file_formats[@]} " =~ " $FILE_FORMAT " ]]; then
           echo "::error::Invalid file format '$FILE_FORMAT'. Valid options are: ${valid_file_formats[*]}"
           exit 1
         fi
 
         # Validate the schema format is an accepted value
-        valid_schema_formats=("json" "yaml" "xml")
+        valid_schema_formats=("json" "yaml" "xml" "toml")
         if [[ -n "$SCHEMA_FORMAT" && ! " ${valid_schema_formats[@]} " =~ " $SCHEMA_FORMAT " ]]; then
           echo "::error::Invalid schema format '$SCHEMA_FORMAT'. Valid options are: ${valid_schema_formats[*]}"
           exit 1
@@ -165,7 +165,7 @@ runs:
             [[ -n "$file" ]] || continue
             if [[ "$file" =~ \.xml$ ]]; then
               INFERRED_FILE_FORMATS+=("xml")
-            elif [[ "$file" =~ \.(json|yaml|yml)$ ]]; then
+            elif [[ "$file" =~ \.(json|yaml|yml|toml|tml)$ ]]; then
               INFERRED_FILE_FORMATS+=("json_yaml")
             fi
           done <<< "$FILES"
@@ -174,10 +174,8 @@ runs:
         elif [[ -n "$FILE_FORMAT" ]]; then
           if [[ "$FILE_FORMAT" == "xml" ]]; then
             INFERRED_FILE_FORMATS=("xml")
-          elif [[ "$FILE_FORMAT" == "json" || "$FILE_FORMAT" == "yaml" ]]; then
+          elif [[ "$FILE_FORMAT" == "json" || "$FILE_FORMAT" == "yaml" || "$FILE_FORMAT" == "toml" ]]; then
             INFERRED_FILE_FORMATS=("json_yaml")
-          elif [[ "$FILE_FORMAT" == "all" ]]; then
-            INFERRED_FILE_FORMATS=("xml" "json_yaml")
           fi
         fi
 
@@ -191,7 +189,7 @@ runs:
               exit 1
             fi
           done
-        elif [[ "$INFERRED_SCHEMA_FORMAT" == "json" || "$INFERRED_SCHEMA_FORMAT" == "yaml" ]]; then
+        elif [[ "$INFERRED_SCHEMA_FORMAT" == "json" || "$INFERRED_SCHEMA_FORMAT" == "yaml" || "$INFERRED_SCHEMA_FORMAT" == "toml" ]]; then
           # JSON/YAML schema cannot validate XML files
           for fmt in "${INFERRED_FILE_FORMATS[@]}"; do
             if [[ "$fmt" == "xml" ]]; then
