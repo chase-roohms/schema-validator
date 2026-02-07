@@ -1,20 +1,38 @@
 # Schema Validator
 
 > [!NOTE]
-> Support JSON, YAML, and XML. I have plans to add functionality to validate TOML files and .env files as well.
+> Support JSON, YAML, TOML, and XML. I have plans to add functionality to validate .env files as well.
 
-- [![Test Full Schema Validation](https://github.com/chase-roohms/schema-validator/actions/workflows/test-schema-validation.yml/badge.svg)](https://github.com/chase-roohms/schema-validator/actions/workflows/test-schema-validation.yml)
+- [![Test Files - Full Schema Validation](https://github.com/chase-roohms/schema-validator/actions/workflows/test-schema-validation-files.yml/badge.svg)](https://github.com/chase-roohms/schema-validator/actions/workflows/test-schema-validation-files.yml)
+- [![Test File Format - Full Schema Validation](https://github.com/chase-roohms/schema-validator/actions/workflows/test-schema-validation-file-format.yml/badge.svg)](https://github.com/chase-roohms/schema-validator/actions/workflows/test-schema-validation-file-format.yml)
 - [![Test Input Validation](https://github.com/chase-roohms/schema-validator/actions/workflows/test-input-validation.yml/badge.svg)](https://github.com/chase-roohms/schema-validator/actions/workflows/test-input-validation.yml)
 - [![Test Output File and Format](https://github.com/chase-roohms/schema-validator/actions/workflows/test-output-file.yml/badge.svg)](https://github.com/chase-roohms/schema-validator/actions/workflows/test-output-file.yml)
 - [![Test Action Outputs](https://github.com/chase-roohms/schema-validator/actions/workflows/test-action-outputs.yml/badge.svg)](https://github.com/chase-roohms/schema-validator/actions/workflows/test-action-outputs.yml)
 
 A flexible GitHub Action for validating JSON, YAML, and XML files against schemas. Supports both local schema files and remote schema URLs, with comprehensive validation reporting in JSON or text format.
 
+### Quick Start
+
+```yaml
+- name: Checkout Repository
+  uses: actions/checkout@v4
+
+- name: Validate JSON Files
+  uses: chase-roohms/schema-validator@v1
+  with:
+    files: |
+      data/users.json
+      data/products.json
+      config/settings.json
+    schema-file: schemas/api-schema.json
+```
+
+
 ## Features
 
-- **Multi-Format Support**: Validate JSON, YAML, and XML files
+- **Multi-Format Support**: Validate JSON, YAML, TOML, and XML files
 - **Flexible Schema Sources**: Use local schema files or remote URLs
-- **Schema Compatibility**: JSON and YAML schemas are interchangeable (both validate JSON/YAML files)
+- **Schema Compatibility**: JSON, YAML, and TOML schemas are interchangeable (all validate JSON/YAML/TOML files)
 - **Multiple Output Formats**: Generate validation reports in JSON or text format
 - **Selective Validation**: Validate specific files or scan entire repository
 - **Built-in Pre-validation**: Automatic checks for file existence, format compatibility, and schema reachability
@@ -42,10 +60,10 @@ A flexible GitHub Action for validating JSON, YAML, and XML files against schema
 | Input | Description | Required | Default |
 |-------|-------------|----------|---------|
 | `files` | Newline-separated list of files to validate. If not provided, all files matching `file-format` will be validated. | No | - |
-| `file-format` | Format of files to validate. Options: `json`, `yaml`, `xml`, `all`. Required if `files` is not provided. Inferred from file extensions if `files` is provided. | No | - |
+| `file-format` | Format of files to validate. Options: `json`, `yaml`, `toml`, `xml`. Required if `files` is not provided. Inferred from file extensions if `files` is provided. | No | - |
 | `schema-file` | Path to local schema file. Must exist on the runner. Mutually exclusive with `schema-url`. | No¹ | - |
 | `schema-url` | URL of the schema to validate against. Will be fetched and used for validation. Mutually exclusive with `schema-file`. | No¹ | - |
-| `schema-format` | Format of the schema. Options: `json`, `yaml`, `xml`. Will be inferred from file extension if not provided. | No | - |
+| `schema-format` | Format of the schema. Options: `json`, `yaml`, `toml`, `xml`. Will be inferred from file extension if not provided. | No | - |
 | `output-format` | Format of validation results. Options: `json`, `text`. | No | `json` |
 | `output-file` | Path to write validation results. | No | `${{ runner.temp }}/validation-results` |
 
@@ -88,6 +106,22 @@ A flexible GitHub Action for validating JSON, YAML, and XML files against schema
       config/app.yaml
       config/database.yaml
     schema-file: schemas/config.schema.yaml
+```
+
+#### Validate TOML Files Against TOML Schema
+
+```yaml
+- name: Checkout Repository
+  uses: actions/checkout@v4
+
+- name: Validate TOML Files
+  uses: chase-roohms/schema-validator@v1
+  with:
+    files: |
+      data/users.toml
+      data/products.toml
+      config/settings.toml
+    schema-file: schemas/api-schema.toml
 ```
 
 #### Validate Mixed JSON/YAML Files
