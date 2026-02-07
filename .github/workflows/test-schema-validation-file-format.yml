@@ -84,7 +84,7 @@ jobs:
         file-format:
           - xml
         schemas:
-          - test-files/xml/any.schema.xml
+          - test-files/xml/any.schema.xsd
     
     steps:
       - name: Checkout Repository
@@ -109,7 +109,7 @@ jobs:
         file-format:
           - xml
         schemas:
-          - test-files/xml/person.schema.xml
+          - test-files/xml/person.schema.xsd
     
     steps:
       - name: Checkout Repository

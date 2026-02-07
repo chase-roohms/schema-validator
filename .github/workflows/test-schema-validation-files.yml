@@ -131,7 +131,7 @@ jobs:
             test-files/xml/good_2.xml
             test-files/xml/good_3.xml
         schemas:
-          - test-files/xml/person.schema.xml
+          - test-files/xml/person.schema.xsd
     
     steps:
       - name: Checkout Repository
@@ -165,7 +165,7 @@ jobs:
             test-files/xml/bad_2.xml
             test-files/xml/bad_3.xml
         schemas:
-          - test-files/xml/person.schema.xml
+          - test-files/xml/person.schema.xsd
     
     steps:
       - name: Checkout Repository
