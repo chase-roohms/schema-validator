@@ -39,6 +39,15 @@ jobs:
             test-files/yaml/good_3.yaml
           schema-file: test-files/json/person.schema.json
 
+      - name: Test JSON on TOML
+        uses: ./
+        with:
+          files: |
+            test-files/toml/good_1.toml
+            test-files/toml/good_2.toml
+            test-files/toml/good_3.toml
+          schema-file: test-files/json/person.schema.json
+
       - name: Test JSON on Mixed
         uses: ./
         with:
@@ -49,6 +58,9 @@ jobs:
             test-files/yaml/good_1.yaml
             test-files/yaml/good_2.yaml
             test-files/yaml/good_3.yaml
+            test-files/toml/good_1.toml
+            test-files/toml/good_2.toml
+            test-files/toml/good_3.toml
           schema-file: test-files/json/person.schema.json
       
       - name: Test YAML on JSON
@@ -68,6 +80,15 @@ jobs:
             test-files/yaml/good_2.yaml
             test-files/yaml/good_3.yaml
           schema-file: test-files/yaml/person.schema.yaml
+      
+      - name: Test YAML on TOML
+        uses: ./
+        with:
+          files: |
+            test-files/toml/good_1.toml
+            test-files/toml/good_2.toml
+            test-files/toml/good_3.toml
+          schema-file: test-files/yaml/person.schema.yaml
 
       - name: Test YAML on Mixed
         uses: ./
@@ -79,6 +100,9 @@ jobs:
             test-files/json/good_1.json
             test-files/json/good_2.json
             test-files/json/good_3.json
+            test-files/toml/good_1.toml
+            test-files/toml/good_2.toml
+            test-files/toml/good_3.toml
           schema-file: test-files/yaml/person.schema.yaml
 
       - name: Test XML on XML
