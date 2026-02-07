@@ -164,3 +164,18 @@ runs:
           echo "::error::Schema URL not reachable: $SCHEMA_URL."
           exit 1
         fi
+    
+    - name: Setup Python
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # 6.2.0
+      with:
+        python-version: '3.13'
+        cache: 'pip'
+    
+    - name: Install Dependencies
+      shell: bash
+      run: pip install -r "${{ github.action_path }}/requirements.txt"
+    
+    - name: Run Schema Validation Script
+      shell: bash
+      run: |
+        python3 "${{ github.action_path }}/src/main.py"
