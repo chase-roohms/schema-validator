@@ -10,7 +10,7 @@ on:
       - main
 
 jobs:
-  test-input-validation:
+  test-input-validation-fails:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -99,9 +99,12 @@ jobs:
             exit 1
           fi
 
-  test-files-exist:
+  test-files-exist-fails:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      
       # Non-existent file
       - name: Non-existent file
         id: non-existent-file
