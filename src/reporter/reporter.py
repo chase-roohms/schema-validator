@@ -22,7 +22,7 @@ class Reporter:
             prefix = not_prefix if result["passed"] else err_prefix
             suffix = not_suffix if result["passed"] else err_suffix
             print(f"{prefix}{key}: {suffix}")
-            print({result['notes']})
+            print(result['notes'])
     
     def write_results(self, file_path: str, format: str):
         # Make sure the directory exists
