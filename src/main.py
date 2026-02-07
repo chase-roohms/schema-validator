@@ -2,6 +2,7 @@ import argparse
 import os
 
 from data_load import DataLoader
+from reporter import Reporter
 from jsonschema import validate, ValidationError, SchemaError
 from lxml import etree
 
@@ -75,27 +76,32 @@ def main():
     
     error_dict = dict()
     # Validate files against schema
+    reporter = Reporter()
     for file_path, file_data in files_to_validate.items():
         try:
             if is_xsd:
                 # Validate XML against XSD (schema_data is already an XMLSchema object)
                 with open(file_path, 'rb') as xml_file:
                     xml_doc = etree.parse(xml_file)
-                if not schema_data.validate(xml_doc):
+                if schema_data.validate(xml_doc):
+                    reporter.add_result(file_path, True, "Valid")
+                else:
                     error_dict[file_path] = schema_data.error_log
+                    reporter.add_result(file_path, False, str(schema_data.error_log))
             else:
                 # Validate using JSON Schema (works for JSON and YAML after parsing)
                 validate(instance=file_data, schema=schema_data)
+                reporter.add_result(file_path, True, "Valid")
         except (SchemaError, etree.DocumentInvalid) as e:
             raise
         except ValidationError as e:
             error_dict[file_path] = str(e)
+            reporter.add_result(file_path, False, str(e))
     
-    if len(error_dict) > 0:
+    reporter.write_results(vars_args['output_file'], vars_args['output_format'])
+    if not reporter.is_successful():
         print("Validation errors found:")
-        for file_path, error in error_dict.items():
-            print(f"::error::{file_path} not valid")
-            print(error)
+        reporter.print_results(errors_only=True)
         quit(1)
 
 if __name__ == "__main__":
