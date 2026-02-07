@@ -9,12 +9,18 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   test-input-validation-fails:
+    name: Test Input Validation Failure Scenarios
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
 
       # Missing files and file-format
       - name: Missing files and file-format
@@ -123,10 +129,13 @@ jobs:
           fi
 
   test-files-exist-fails:
+    name: Test File Existence Failure Scenarios
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
       
       # Non-existent file
       - name: Non-existent file
@@ -179,10 +188,13 @@ jobs:
           fi
 
   test-url-exists-fails:
+    name: Test Schema URL Failure Scenarios
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
       
       - name: Test Schema URL Not Reachable
         id: test-schema-url-not-reachable

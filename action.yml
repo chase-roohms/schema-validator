@@ -173,9 +173,14 @@ runs:
     
     - name: Install Dependencies
       shell: bash
-      run: pip install -r "${{ github.action_path }}/requirements.txt"
+      env:
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
+      run: |
+        pip install -r "${GITHUB_ACTION_PATH}/requirements.txt"
     
     - name: Run Schema Validation Script
       shell: bash
+      env:
+        GITHUB_ACTION_PATH: ${{ github.action_path }}
       run: |
-        python3 "${{ github.action_path }}/src/main.py"
+        python3 "${GITHUB_ACTION_PATH}/src/main.py"
