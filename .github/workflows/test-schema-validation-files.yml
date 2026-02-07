@@ -57,7 +57,7 @@ jobs:
         uses: ./
         with:
           files: ${{ matrix.files }}
-          schema-url: ${{ matrix.schemas }}
+          schema-file: ${{ matrix.schemas }}
       
       - name: Test Schema Validation w/ URL
         id: test-schema-url
@@ -65,7 +65,6 @@ jobs:
         with:
           files: ${{ matrix.files }}
           schema-url: https://raw.githubusercontent.com/chase-roohms/schema-validator/${{ github.ref }}/${{ matrix.schemas }}
-    
   
   test-failing-json-schema-validation:
     name: JSON Types - Failing Validation
