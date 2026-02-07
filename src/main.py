@@ -15,7 +15,9 @@ def main():
     parser.add_argument("--output-format", type=str, help="output format")
     parser.add_argument("--output-file", type=str, help="output file")
     args = parser.parse_args()
-    pp(vars(args))
+    vars_args = vars(args)
+    vars_args['files'] = vars_args['files'].splitlines() if vars_args['files'] else []
+    pp(vars_args)
 
 if __name__ == "__main__":
     main()
