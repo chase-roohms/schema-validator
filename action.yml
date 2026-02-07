@@ -55,7 +55,7 @@ inputs:
 outputs:
   validation-passed:
     description: 'Indicates whether the validation passed or failed (true or false)'
-    value: ${{ steps.validate.outputs.validation-results }}
+    value: ${{ steps.validation-results.outputs.passed }}
   output-file:
     description: 'The file to write the validation results to'
     value: ${{ inputs.output-file }}
@@ -274,7 +274,9 @@ runs:
         echo "::endgroup::"
     
     - name: Run Schema Validation Script
+      id: run-schema-validation
       shell: bash
+      continue-on-error: true
       env:
         GITHUB_ACTION_PATH: ${{ github.action_path }}
         FILES: ${{ inputs.files }}
@@ -293,3 +295,16 @@ runs:
           --schema-format "$SCHEMA_FORMAT" \
           --output-format "$OUTPUT_FORMAT" \
           --output-file "$OUTPUT_FILE"
+    
+    - name: Validation Results
+      id: validation-results
+      shell: bash
+      env:
+        OUTCOME: ${{ steps.run-schema-validation.outcome }}
+      run: |
+        if [[ $OUTCOME == "success" ]]; then
+          echo "passed=true" >> $GITHUB_OUTPUT
+        else
+          echo "passed=false" >> $GITHUB_OUTPUT
+          exit 1
+        fi
