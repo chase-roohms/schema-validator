@@ -184,5 +184,19 @@ runs:
       shell: bash
       env:
         GITHUB_ACTION_PATH: ${{ github.action_path }}
+        FILES: ${{ inputs.files }}
+        FILE_FORMAT: ${{ inputs.file-format }}
+        SCHEMA_FILE: ${{ inputs.schema-file }}
+        SCHEMA_URL: ${{ inputs.schema-url }}
+        SCHEMA_FORMAT: ${{ inputs.schema-format }}
+        OUTPUT_FORMAT: ${{ inputs.output-format }}
+        OUTPUT_FILE: ${{ inputs.output-file }}
       run: |
-        python3 "${GITHUB_ACTION_PATH}/src/main.py"
+        python3 "${GITHUB_ACTION_PATH}/src/main.py" \
+          --files "$FILES" \
+          --file-format "$FILE_FORMAT" \
+          --schema-file "$SCHEMA_FILE" \
+          --schema-url "$SCHEMA_URL" \
+          --schema-format "$SCHEMA_FORMAT" \
+          --output-format "$OUTPUT_FORMAT" \
+          --output-file "$OUTPUT_FILE"
