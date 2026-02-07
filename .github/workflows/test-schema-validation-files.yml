@@ -1,4 +1,4 @@
-name: Test Full Schema Validation
+name: Test Files - Full Schema Validation
 
 on:
   workflow_dispatch:
@@ -57,7 +57,14 @@ jobs:
         uses: ./
         with:
           files: ${{ matrix.files }}
-          schema-file: ${{ matrix.schemas }}
+          schema-url: ${{ matrix.schemas }}
+      
+      - name: Test Schema Validation w/ URL
+        id: test-schema-url
+        uses: ./
+        with:
+          files: ${{ matrix.files }}
+          schema-url: https://raw.githubusercontent.com/chase-roohms/schema-validator/${{ github.ref }}/${{ matrix.schemas }}
     
   
   test-failing-json-schema-validation:
@@ -136,6 +143,13 @@ jobs:
         with:
           files: ${{ matrix.files }}
           schema-file: ${{ matrix.schemas }}
+      
+      - name: Test Schema Validation w/ URL
+        id: test-schema-url
+        uses: ./
+        with:
+          files: ${{ matrix.files }}
+          schema-url: https://raw.githubusercontent.com/chase-roohms/schema-validator/${{ github.ref }}/${{ matrix.schemas }}
     
   test-failing-xml-schema-validation:
     name: XML Types - Failing Validation

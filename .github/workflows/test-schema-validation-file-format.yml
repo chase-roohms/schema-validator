@@ -1,0 +1,127 @@
+name: Test File Format - Full Schema Validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test-passing-json-schema-validation:
+    name: JSON Types - Passing Validation
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        file-format:
+          - json
+          - yaml
+          - toml
+        schemas:
+          - test-files/json/any.schema.json
+          - test-files/yaml/any.schema.yaml
+          - test-files/toml/any.schema.toml
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      
+      - name: Test Schema Validation
+        id: test-schema
+        uses: ./
+        with:
+          file-format: ${{ matrix.file-format }}
+          schema-file: ${{ matrix.schemas }}
+    
+  
+  test-failing-json-schema-validation:
+    name: JSON Types - Failing Validation
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        file-format:
+          - json
+          - yaml
+          - toml
+        schemas:
+          - test-files/json/person.schema.json
+          - test-files/yaml/person.schema.yaml
+          - test-files/toml/person.schema.toml
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      
+      - name: Test Schema Validation
+        id: test-schema
+        continue-on-error: true
+        uses: ./
+        with:
+          file-format: ${{ matrix.file-format }}
+          schema-file: ${{ matrix.schemas }}
+      
+      - name: Fail if any validation passed
+        if: ${{ steps.test-schema.outcome == 'success' }}
+        run: exit 1
+    
+  test-passing-xml-schema-validation:
+    name: XML Types - Passing Validation
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        file-format:
+          - xml
+        schemas:
+          - test-files/xml/any.schema.xml
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      
+      - name: Test Schema Validation
+        id: test-schema
+        uses: ./
+        with:
+          file-format: ${{ matrix.file-format }}
+          schema-file: ${{ matrix.schemas }}
+    
+  
+  test-failing-xml-schema-validation:
+    name: XML Types - Failing Validation
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        file-format:
+          - xml
+        schemas:
+          - test-files/xml/person.schema.xml
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      
+      - name: Test Schema Validation
+        id: test-schema
+        continue-on-error: true
+        uses: ./
+        with:
+          file-format: ${{ matrix.file-format }}
+          schema-file: ${{ matrix.schemas }}
+      
+      - name: Fail if any validation passed
+        if: ${{ steps.test-schema.outcome == 'success' }}
+        run: exit 1
+    
