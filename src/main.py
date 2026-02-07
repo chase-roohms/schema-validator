@@ -1,4 +1,5 @@
 import argparse
+import os
 from pprint import pp
 
 def main():
@@ -16,7 +17,10 @@ def main():
     parser.add_argument("--output-file", type=str, help="output file")
     args = parser.parse_args()
     vars_args = vars(args)
-    vars_args['files'] = vars_args['files'].splitlines() if vars_args['files'] else []
+    if vars_args['files']:
+        vars_args['files'] = [os.path.abspath(f) for f in vars_args['files'].splitlines()]
+    if vars_args['schema_file']:
+        vars_args['schema_file'] = os.path.abspath(vars_args['schema_file'])
     pp(vars_args)
 
 if __name__ == "__main__":
