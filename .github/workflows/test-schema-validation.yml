@@ -1,4 +1,4 @@
-name: Test Validation Steps
+name: Test Full Schema Validation
 
 on:
   workflow_dispatch:
