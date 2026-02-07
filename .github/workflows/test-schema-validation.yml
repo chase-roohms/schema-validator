@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  test-schema-validation:
+  test-passing-schema-validation:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -64,4 +64,57 @@ jobs:
             test-files/xml/good_1.xml
             test-files/xml/good_2.xml
             test-files/xml/good_3.xml
+          schema-file: test-files/xml/person.schema.xsd
+  
+  test-failing-schema-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Test JSON on JSON
+        uses: ./
+        with:
+          files: |
+            test-files/json/bad_1.json
+            test-files/json/bad_2.json
+            test-files/json/bad_3.json
+          schema-file: test-files/json/person.schema.json
+
+      - name: Test JSON on YAML
+        uses: ./
+        with:
+          files: |
+            test-files/yaml/bad_1.yaml
+            test-files/yaml/bad_2.yaml
+            test-files/yaml/bad_3.yaml
+          schema-file: test-files/json/person.schema.json
+      
+      - name: Test YAML on JSON
+        uses: ./
+        with:
+          files: |
+            test-files/json/bad_1.json
+            test-files/json/bad_2.json
+            test-files/json/bad_3.json
+          schema-file: test-files/yaml/person.schema.yaml
+      
+      - name: Test YAML on YAML
+        uses: ./
+        with:
+          files: |
+            test-files/yaml/bad_1.yaml
+            test-files/yaml/bad_2.yaml
+            test-files/yaml/bad_3.yaml
+          schema-file: test-files/yaml/person.schema.yaml
+
+      - name: Test XML on XML
+        uses: ./
+        with:
+          files: |
+            test-files/xml/bad_1.xml
+            test-files/xml/bad_2.xml
+            test-files/xml/bad_3.xml
           schema-file: test-files/xml/person.schema.xsd
