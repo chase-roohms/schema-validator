@@ -3,7 +3,8 @@ import os
 
 from pprint import pp
 from data_load import DataLoader
-from schema import Schema, SchemaError
+from jsonschema import validate, ValidationError
+from lxml import etree
 
 def main():
     parser = argparse.ArgumentParser(
@@ -49,18 +50,47 @@ def main():
 
     # Set schema data
     if vars_args['schema_file']:
-        schema_data = DataLoader.load_file(os.path.abspath(vars_args['schema_file']), vars_args['schema_format'])
+        schema_file_path = os.path.abspath(vars_args['schema_file'])
+        # Determine if it's an XSD schema or JSON Schema
+        if schema_file_path.endswith('.xsd'):
+            # For XSD, load the schema using DataLoader
+            schema_data = DataLoader.load_xsd_file(schema_file_path)
+            is_xsd = True
+        else:
+            schema_data = DataLoader.load_file(schema_file_path, vars_args['schema_format'])
+            is_xsd = False
     elif vars_args['schema_url']:
-        schema_data = DataLoader.load_url(vars_args['schema_url'], vars_args['schema_format'])
+        # Check if the URL points to an XSD file
+        if vars_args['schema_url'].endswith('.xsd'):
+            schema_data = DataLoader.load_xsd_url(vars_args['schema_url'])
+            is_xsd = True
+        else:
+            schema_data = DataLoader.load_url(vars_args['schema_url'], vars_args['schema_format'])
+            is_xsd = False
+    else:
+        is_xsd = False
     
     # Validate files against schema
-    schema = Schema(schema_data)
     for file_path, file_data in files_to_validate.items():
         try:
-            schema.validate(file_data)
-            print(f"File {file_path} is valid.")
-        except SchemaError as e:
+            if is_xsd:
+                # Validate XML against XSD (schema_data is already an XMLSchema object)
+                with open(file_path, 'rb') as xml_file:
+                    xml_doc = etree.parse(xml_file)
+                if schema_data.validate(xml_doc):
+                    print(f"File {file_path} is valid.")
+                else:
+                    print(f"File {file_path} is invalid: {schema_data.error_log}")
+            else:
+                # Validate using JSON Schema (works for JSON and YAML after parsing)
+                validate(instance=file_data, schema=schema_data)
+                print(f"File {file_path} is valid.")
+        except ValidationError as e:
+            print(f"File {file_path} is invalid: {e.message}")
+        except etree.DocumentInvalid as e:
             print(f"File {file_path} is invalid: {e}")
+        except Exception as e:
+            print(f"File {file_path} validation error: {e}")
 
 if __name__ == "__main__":
     main()

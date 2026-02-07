@@ -2,6 +2,7 @@ import yaml
 import json
 import xmltodict
 import requests
+from lxml import etree
 
 class DataLoader:
     @staticmethod
@@ -67,3 +68,17 @@ class DataLoader:
     def __load_xml(file_path):
         with open(file_path, "r") as f:
             return xmltodict.parse(f.read())
+    
+    @staticmethod
+    def load_xsd_file(file_path):
+        """Load an XSD schema from a file and return an XMLSchema object."""
+        with open(file_path, 'rb') as schema_file:
+            schema_root = etree.XML(schema_file.read())
+            return etree.XMLSchema(schema_root)
+    
+    @staticmethod
+    def load_xsd_url(url):
+        """Load an XSD schema from a URL and return an XMLSchema object."""
+        response = requests.get(url)
+        schema_root = etree.XML(response.content)
+        return etree.XMLSchema(schema_root)
