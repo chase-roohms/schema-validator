@@ -42,6 +42,7 @@ inputs:
       The format of the validation results.
       Options: json, text
     required: false
+    default: text
   output-file:
     # Used instead of outputs since there is a chance the output size could be too
     # large for GitHub Actions to handle as an output. (Max 1 MB)
@@ -90,6 +91,18 @@ runs:
           exit 1
         fi
 
+        # Validate the output format is supplied
+        if [[ -z "$OUTPUT_FORMAT" ]]; then
+          echo "::error::Output format must be provided."
+          exit 1
+        fi
+
+        # Validate that the output file is supplied
+        if [[ -z "$OUTPUT_FILE" ]]; then
+          echo "::error::Output file must be provided."
+          exit 1
+        fi
+
         #################### inputs with options ####################
         # Validate the file format is an accepted value
         valid_file_formats=("json" "yaml" "xml" "all")
@@ -107,7 +120,7 @@ runs:
 
         # Validate the output format is an accepted value
         valid_output_formats=("json" "text")
-        if [[ -n "$OUTPUT_FORMAT" && ! " ${valid_output_formats[@]} " =~ " $OUTPUT_FORMAT " ]]; then
+        if [[ ! " ${valid_output_formats[@]} " =~ " $OUTPUT_FORMAT " ]]; then
           echo "::error::Invalid output format '$OUTPUT_FORMAT'. Valid options are: ${valid_output_formats[*]}"
           exit 1
         fi
