@@ -81,7 +81,7 @@ jobs:
             test-files/json/good_1.json
             test-files/json/good_2.json
             test-files/json/good_3.json
-          schema-url: https://raw.githubusercontent.com/chase-roohms/schema-validator/refs/heads/${{ github.ref }}/test-files/json/person.schema.json
+          schema-url: https://raw.githubusercontent.com/chase-roohms/schema-validator/${{ github.ref }}/test-files/json/person.schema.json
 
       - name: Test JSON on YAML
         uses: ./
@@ -90,7 +90,7 @@ jobs:
             test-files/yaml/good_1.yaml
             test-files/yaml/good_2.yaml
             test-files/yaml/good_3.yaml
-          schema-url: https://raw.githubusercontent.com/chase-roohms/schema-validator/refs/heads/${{ github.ref }}/test-files/json/person.schema.json
+          schema-url: https://raw.githubusercontent.com/chase-roohms/schema-validator/${{ github.ref }}/test-files/json/person.schema.json
       
       - name: Test YAML on JSON
         uses: ./
@@ -99,7 +99,7 @@ jobs:
             test-files/json/good_1.json
             test-files/json/good_2.json
             test-files/json/good_3.json
-          schema-url: https://raw.githubusercontent.com/chase-roohms/schema-validator/refs/heads/${{ github.ref }}/test-files/yaml/person.schema.yaml
+          schema-url: https://raw.githubusercontent.com/chase-roohms/schema-validator/${{ github.ref }}/test-files/yaml/person.schema.yaml
       
       - name: Test YAML on YAML
         uses: ./
@@ -108,7 +108,7 @@ jobs:
             test-files/yaml/good_1.yaml
             test-files/yaml/good_2.yaml
             test-files/yaml/good_3.yaml
-          schema-url: https://raw.githubusercontent.com/chase-roohms/schema-validator/refs/heads/${{ github.ref }}/test-files/yaml/person.schema.yaml
+          schema-url: https://raw.githubusercontent.com/chase-roohms/schema-validator/${{ github.ref }}/test-files/yaml/person.schema.yaml
 
       - name: Test XML on XML
         uses: ./
@@ -117,7 +117,7 @@ jobs:
             test-files/xml/good_1.xml
             test-files/xml/good_2.xml
             test-files/xml/good_3.xml
-          schema-url: https://raw.githubusercontent.com/chase-roohms/schema-validator/refs/heads/${{ github.ref }}/test-files/xml/person.schema.xsd
+          schema-url: https://raw.githubusercontent.com/chase-roohms/schema-validator/${{ github.ref }}/test-files/xml/person.schema.xsd
   
   test-failing-schema-validation:
     runs-on: ubuntu-latest
