@@ -75,6 +75,14 @@ jobs:
           INVALID_SCHEMA_FORMAT_OPTION: ${{ steps.invalid-schema-format-option.outcome }}
           INVALID_OUTPUT_FORMAT_OPTION: ${{ steps.invalid-output-format-option.outcome }}
         run: |
+          function pick_emoji() {
+            case "$1" in
+              success) echo "✅" ;;
+              failure) echo "❌" ;;
+              *) echo "❓" ;;
+            esac
+          }
+
           # Flip results, failure -> success
           [ "$MISSING_FILES_AND_FORMAT" = "failure" ] && MISSING_FILES_AND_FORMAT="success"
           [ "$MISSING_SCHEMA_FILE_AND_URL" = "failure" ] && MISSING_SCHEMA_FILE_AND_URL="success"
@@ -83,11 +91,11 @@ jobs:
           [ "$INVALID_OUTPUT_FORMAT_OPTION" = "failure" ] && INVALID_OUTPUT_FORMAT_OPTION="success"
           
           # Show results in GitHub step summary
-          echo "Missing files and file-format: $MISSING_FILES_AND_FORMAT" >> $GITHUB_STEP_SUMMARY
-          echo "Missing schema-file and schema-url: $MISSING_SCHEMA_FILE_AND_URL" >> $GITHUB_STEP_SUMMARY
-          echo "Invalid file-format option: $INVALID_FILE_FORMAT_OPTION" >> $GITHUB_STEP_SUMMARY
-          echo "Invalid schema-format option: $INVALID_SCHEMA_FORMAT_OPTION" >> $GITHUB_STEP_SUMMARY
-          echo "Invalid output-format option: $INVALID_OUTPUT_FORMAT_OPTION" >> $GITHUB_STEP_SUMMARY
+          echo "Missing files and file-format: $(pick_emoji $MISSING_FILES_AND_FORMAT)" >> $GITHUB_STEP_SUMMARY
+          echo "Missing schema-file and schema-url: $(pick_emoji $MISSING_SCHEMA_FILE_AND_URL)" >> $GITHUB_STEP_SUMMARY
+          echo "Invalid file-format option: $(pick_emoji $INVALID_FILE_FORMAT_OPTION)" >> $GITHUB_STEP_SUMMARY
+          echo "Invalid schema-format option: $(pick_emoji $INVALID_SCHEMA_FORMAT_OPTION)" >> $GITHUB_STEP_SUMMARY
+          echo "Invalid output-format option: $(pick_emoji $INVALID_OUTPUT_FORMAT_OPTION)" >> $GITHUB_STEP_SUMMARY
           
           # Validate that all tests failed
           if [ "$MISSING_FILES_AND_FORMAT" != "success" ] || \
@@ -139,8 +147,8 @@ jobs:
           [ "$NON_EXISTENT_SCHEMA_FILE" = "failure" ] && NON_EXISTENT_SCHEMA_FILE="success"
           
           # Show results in GitHub step summary
-          echo "Non-existent file: $NON_EXISTENT_FILE" >> $GITHUB_STEP_SUMMARY
-          echo "Non-existent schema file: $NON_EXISTENT_SCHEMA_FILE" >> $GITHUB_STEP_SUMMARY
+          echo "Non-existent file: $(pick_emoji $NON_EXISTENT_FILE)" >> $GITHUB_STEP_SUMMARY
+          echo "Non-existent schema file: $(pick_emoji $NON_EXISTENT_SCHEMA_FILE)" >> $GITHUB_STEP_SUMMARY
           
           # Validate that all tests failed
           if [ "$NON_EXISTENT_FILE" != "success" ] || \
