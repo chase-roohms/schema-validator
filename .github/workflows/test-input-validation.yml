@@ -179,7 +179,6 @@ jobs:
           files: |
             test-files/good_1.json
           schema-url: https://example.com/non-existent.schema.json
-          output-format: invalid-option
           
       - name: Collect results
         id: collect-results
