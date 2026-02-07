@@ -30,8 +30,10 @@ class Reporter:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         if format == "json":
             self.__write_json(file_path)
-        elif format == "txt":
+        elif format == "text":
             self.__write_txt(file_path)
+        else:
+            raise ValueError(f"Unsupported format: {format}")
     
     def is_successful(self):
         return all(result["passed"] for result in self.results.values())
