@@ -555,19 +555,22 @@ The action enforces schema format compatibility:
 
 - **JSON Schema** → JSON files
 - **JSON Schema** → YAML files
-- **JSON Schema** → Mixed JSON/YAML files
+- **JSON Schema** → TOML files
+- **JSON Schema** → Mixed JSON/YAML/TOML files
 - **YAML Schema** → JSON files
 - **YAML Schema** → YAML files
-- **YAML Schema** → Mixed JSON/YAML files
+- **YAML Schema** → TOML files
+- **YAML Schema** → Mixed JSON/YAML/TOML files
 - **XSD Schema** → XML files only
 
 ### ❌ Incompatible Combinations
 
 - **XSD Schema** → JSON files *(will fail)*
 - **XSD Schema** → YAML files *(will fail)*
-- **JSON/YAML Schema** → XML files *(will fail)*
+- **XSD Schema** → TOML files *(will fail)*
+- **JSON/YAML/TOML Schema** → XML files *(will fail)*
 
-**Why?** JSON and YAML use the same schema format (JSON Schema), so they're interchangeable. XML uses a different schema system (XSD), which is incompatible with JSON/YAML.
+**Why?** JSON, YAML, and TOML use the same schema format (JSON Schema), so they're interchangeable. XML uses a different schema system (XSD), which is incompatible with JSON/YAML/TOML.
 
 ## Error Handling
 
@@ -610,7 +613,7 @@ Example:
 
 - Repository must be checked out (use `actions/checkout` before this action)
 - Schema file must exist if using `schema-file`
-- Schema URL must be accessible if using `schema-url`
+- Schema URL must be publically accessible if using `schema-url`
 
 ## License
 
