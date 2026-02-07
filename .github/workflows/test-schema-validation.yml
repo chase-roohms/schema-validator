@@ -25,5 +25,5 @@ jobs:
         uses: ./
         with:
           files: |
-            test-files/good_1.json
-          schema-file: test-files/example.schema.json
+            test-files/json/good_1.json
+          schema-file: test-files/json/example.schema.json

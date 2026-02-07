@@ -28,7 +28,7 @@ jobs:
         uses: ./
         continue-on-error: true
         with:
-          schema-file: test-files/example.schema.json
+          schema-file: test-files/json/example.schema.json
 
       # Missing schema-file and schema-url
       - name: Missing schema-file and schema-url
@@ -37,7 +37,7 @@ jobs:
         continue-on-error: true
         with:
           files: |
-            test-files/good_1.json
+            test-files/json/good_1.json
 
       # Both schema-file and schema-url
       - name: Both schema-file and schema-url
@@ -46,8 +46,8 @@ jobs:
         continue-on-error: true
         with:
           files: |
-            test-files/good_1.json
-          schema-file: test-files/example.schema.json
+            test-files/json/good_1.json
+          schema-file: test-files/json/example.schema.json
           schema-url: https://example.com/schema.json
       
       # Invalid file-format option
@@ -57,9 +57,9 @@ jobs:
         continue-on-error: true
         with:
           files: |
-            test-files/good_1.json
+            test-files/json/good_1.json
           file-format: invalid-option
-          schema-file: test-files/example.schema.json
+          schema-file: test-files/json/example.schema.json
       
       # Invalid schema-format option
       - name: Invalid schema-format option
@@ -68,8 +68,8 @@ jobs:
         continue-on-error: true
         with:
           files: |
-            test-files/good_1.json
-          schema-file: test-files/example.schema.json
+            test-files/json/good_1.json
+          schema-file: test-files/json/example.schema.json
           schema-format: invalid-option
       
       # Invalid output-format option
@@ -79,8 +79,8 @@ jobs:
         continue-on-error: true
         with:
           files: |
-            test-files/good_1.json
-          schema-file: test-files/example.schema.json
+            test-files/json/good_1.json
+          schema-file: test-files/json/example.schema.json
           output-format: invalid-option
       
       - name: Collect results
@@ -144,9 +144,9 @@ jobs:
         continue-on-error: true
         with:
           files: |
-            test-files/good_1.json
+            test-files/json/good_1.json
             test-files/non-existent.json
-          schema-file: test-files/example.schema.json
+          schema-file: test-files/json/example.schema.json
       
       # Non-existent schema
       - name: Non-existent schema file
@@ -155,7 +155,7 @@ jobs:
         continue-on-error: true
         with:
           files: |
-            test-files/good_1.json
+            test-files/json/good_1.json
           schema-file: test-files/non-existent.schema.json
       
       - name: Collect results
@@ -202,7 +202,7 @@ jobs:
         continue-on-error: true
         with:
           files: |
-            test-files/good_1.json
+            test-files/json/good_1.json
           schema-url: https://example.com/non-existent-plus-ultra.schema.json
           
       - name: Collect results
