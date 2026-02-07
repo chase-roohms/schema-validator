@@ -179,7 +179,9 @@ runs:
       env:
         GITHUB_ACTION_PATH: ${{ github.action_path }}
       run: |
+        echo "::group::Installing pip dependencies..."
         pip install -r "${GITHUB_ACTION_PATH}/requirements.txt"
+        echo "::endgroup::"
     
     - name: Run Schema Validation Script
       shell: bash
