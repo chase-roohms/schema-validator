@@ -2,11 +2,8 @@ import argparse
 import os
 
 from pprint import pp
-
-from data_load.data_load import DataLoader
-
-def get_file_dict_list(files, file_format: str = None):
-    return [DataLoader.load_file(f, file_format) for f in files]
+from data_load import DataLoader
+from schema import Schema, SchemaError
 
 def main():
     parser = argparse.ArgumentParser(
@@ -28,13 +25,13 @@ def main():
     for key, value in vars_args.items():
         if value == '':
             vars_args[key] = None
-    # Print parsed arguments
+    # Print parsed arguments for debugging
     print("Parsed arguments:")
     pp(vars_args)
 
     # Set files to validate
     if vars_args['files']:
-        vars_args['files'] = [os.path.abspath(f) for f in vars_args['files'].splitlines()]
+        vars_args['files'] = [f for f in vars_args['files'].splitlines()]
     else:
         # Find files based on file-format
         format_extensions = {
@@ -43,19 +40,27 @@ def main():
             'xml': ['.xml']
         }
         extensions = format_extensions.get(vars_args['file_format'], [f".{vars_args['file_format']}"])
-        vars_args['files'] = [os.path.abspath(f) for f in os.listdir('.') if any(f.endswith(ext) for ext in extensions)]
-    files_to_validate = [
-        DataLoader.load_file(f, vars_args['file_format']) for f in vars_args['files']
-    ]
+        vars_args['files'] = [f for f in os.listdir('.') if any(f.endswith(ext) for ext in extensions)]
+    
+    # Save dictionary with the filepaths as keys and the data from each file as values
+    files_to_validate = {
+        f: DataLoader.load_file(f, vars_args['file_format']) for f in vars_args['files']
+    }
 
     # Set schema data
     if vars_args['schema_file']:
         schema_data = DataLoader.load_file(os.path.abspath(vars_args['schema_file']), vars_args['schema_format'])
     elif vars_args['schema_url']:
         schema_data = DataLoader.load_url(vars_args['schema_url'], vars_args['schema_format'])
-
-    pp(files_to_validate)
-    pp(schema_data)
+    
+    # Validate files against schema
+    schema = Schema(schema_data)
+    for file_path, file_data in files_to_validate.items():
+        try:
+            schema.validate(file_data)
+            print(f"File {file_path} is valid.")
+        except SchemaError as e:
+            print(f"File {file_path} is invalid: {e}")
 
 if __name__ == "__main__":
     main()
