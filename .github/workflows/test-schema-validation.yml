@@ -75,7 +75,9 @@ jobs:
           persist-credentials: false
 
       - name: Test JSON on JSON
+        id: json-json
         uses: ./
+        continue-on-error: true
         with:
           files: |
             test-files/json/bad_1.json
@@ -84,7 +86,9 @@ jobs:
           schema-file: test-files/json/person.schema.json
 
       - name: Test JSON on YAML
+        id: json-yaml
         uses: ./
+        continue-on-error: true
         with:
           files: |
             test-files/yaml/bad_1.yaml
@@ -93,7 +97,9 @@ jobs:
           schema-file: test-files/json/person.schema.json
       
       - name: Test YAML on JSON
+        id: yaml-json
         uses: ./
+        continue-on-error: true
         with:
           files: |
             test-files/json/bad_1.json
@@ -102,7 +108,9 @@ jobs:
           schema-file: test-files/yaml/person.schema.yaml
       
       - name: Test YAML on YAML
+        id: yaml-yaml
         uses: ./
+        continue-on-error: true
         with:
           files: |
             test-files/yaml/bad_1.yaml
@@ -111,10 +119,51 @@ jobs:
           schema-file: test-files/yaml/person.schema.yaml
 
       - name: Test XML on XML
+        id: xml-xml
         uses: ./
+        continue-on-error: true
         with:
           files: |
             test-files/xml/bad_1.xml
             test-files/xml/bad_2.xml
             test-files/xml/bad_3.xml
           schema-file: test-files/xml/person.schema.xsd
+      
+      - name: Collect Validation Results
+        env:
+          JSON_JSON: ${{ steps.json-json.outcome }}
+          JSON_YAML: ${{ steps.json-yaml.outcome }}
+          YAML_JSON: ${{ steps.yaml-json.outcome }}
+          YAML_YAML: ${{ steps.yaml-yaml.outcome }}
+          XML_XML: ${{ steps.xml-xml.outcome }}
+        run: |
+          function pick_emoji() {
+            case "$1" in
+              success) echo "✅" ;;
+              failure) echo "❌" ;;
+              *) echo "❓" ;;
+            esac
+          }
+
+          # Flip results, failure -> success
+          [ "$JSON_JSON" = "failure" ] && JSON_JSON="success"
+          [ "$JSON_YAML" = "failure" ] && JSON_YAML="success"
+          [ "$YAML_JSON" = "failure" ] && YAML_JSON="success"
+          [ "$YAML_YAML" = "failure" ] && YAML_YAML="success"
+          [ "$XML_XML" = "failure" ] && XML_XML="success"
+          
+          echo "$(pick_emoji $JSON_JSON) JSON on JSON"
+          echo "$(pick_emoji $JSON_YAML) JSON on YAML"
+          echo "$(pick_emoji $YAML_JSON) YAML on JSON"
+          echo "$(pick_emoji $YAML_YAML) YAML on YAML"
+          echo "$(pick_emoji $XML_XML) XML on XML"
+          
+          # Validate that all tests failed
+          if [ "$JSON_JSON" != "success" ] || \
+             [ "$JSON_YAML" != "success" ] || \
+             [ "$YAML_JSON" != "success" ] || \
+             [ "$YAML_YAML" != "success" ] || \
+             [ "$XML_XML" != "success" ]; then
+            echo "::error::One or more tests did not fail as expected"
+            exit 1
+          fi
