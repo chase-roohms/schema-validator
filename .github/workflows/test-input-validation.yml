@@ -164,3 +164,44 @@ jobs:
             echo "::error::One or more tests did not fail as expected"
             exit 1
           fi
+
+  test-url-exists-fails:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+      
+      - name: Test Schema URL Not Reachable
+        id: test-schema-url-not-reachable
+        uses: ./
+        continue-on-error: true
+        with:
+          files: |
+            test-files/good_1.json
+          schema-url: https://example.com/non-existent.schema.json
+          output-format: invalid-option
+          
+      - name: Collect results
+        id: collect-results
+        env:
+          SCHEMA_URL_NOT_REACHABLE: ${{ steps.test-schema-url-not-reachable.outcome }}
+        run: |
+          function pick_emoji() {
+            case "$1" in
+              success) echo "✅" ;;
+              failure) echo "❌" ;;
+              *) echo "❓" ;;
+            esac
+          }
+          
+          # Flip results, failure -> success
+          [ "$SCHEMA_URL_NOT_REACHABLE" = "failure" ] && SCHEMA_URL_NOT_REACHABLE="success"
+          
+          # Show results in GitHub step summary
+          echo "$(pick_emoji $SCHEMA_URL_NOT_REACHABLE) Schema URL not reachable" >> $GITHUB_STEP_SUMMARY
+          
+          # Validate that all tests failed
+          if [ "$SCHEMA_URL_NOT_REACHABLE" != "success" ]; then
+            echo "::error::One or more tests did not fail as expected"
+            exit 1
+          fi

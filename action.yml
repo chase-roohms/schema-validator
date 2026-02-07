@@ -151,3 +151,17 @@ runs:
           echo "::error::Schema file not found: $SCHEMA_FILE."
           exit 1
         fi
+    
+    - name: Validate Schema URL Exists
+      if: ${{ inputs.schema-url != '' }}
+      id: validate-schema-url
+      shell: bash
+      env:
+        SCHEMA_URL: ${{ inputs.schema-url }}
+      run: |
+        # Check if the schema URL is reachable
+        if ! curl --head --silent --fail "$SCHEMA_URL" > /dev/null; then
+          echo "::error::Schema URL not reachable: $SCHEMA_URL."
+          exit 1
+        fi
+    
