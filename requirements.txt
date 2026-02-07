@@ -1,2 +1,4 @@
-xmltodict
+xmltodict==1.0.2
+PyYAML==6.0.3
 schema==0.7.8
+requests==2.32.5
