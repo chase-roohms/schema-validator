@@ -37,7 +37,13 @@ def main():
             'xml': ['.xml', '.xsd']
         }
         extensions = format_extensions.get(vars_args['file_format'], [f".{vars_args['file_format']}"])
-        vars_args['files'] = [f for f in os.listdir('.') if any(f.endswith(ext) and f != os.path.abspath(vars_args['schema_file']) for ext in extensions)]
+        files = []
+        for root, dirs, filenames in os.walk('.'):
+            for filename in filenames:
+                filepath = os.path.join(root, filename)
+                if any(filename.endswith(ext) for ext in extensions) and os.path.abspath(filepath) != os.path.abspath(vars_args['schema_file']):
+                    files.append(filepath)
+        vars_args['files'] = files
         print(f"Found files to validate: {vars_args['files']}")
     
     # Save dictionary with the filepaths as keys and the data from each file as values
