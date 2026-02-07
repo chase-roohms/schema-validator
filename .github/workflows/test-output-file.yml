@@ -41,6 +41,7 @@ jobs:
             exit 1
           fi
           echo "✅ JSON output file exists"
+          cat "${{ runner.temp }}/validation-results-pass.json"
       
       - name: Validate JSON Output is Valid JSON (Passing)
         shell: bash
@@ -50,6 +51,7 @@ jobs:
             exit 1
           fi
           echo "✅ JSON output file is valid JSON"
+          cat "${{ runner.temp }}/validation-results-pass.json"
       
       - name: Validate JSON Output Content (Passing)
         shell: bash
@@ -69,6 +71,7 @@ jobs:
           fi
           
           echo "✅ JSON output content is correct for passing validation"
+          cat "${{ runner.temp }}/validation-results-pass.json"
       
       - name: Test JSON Output with Failing Validation
         id: test-json-failing
@@ -91,6 +94,7 @@ jobs:
             exit 1
           fi
           echo "✅ JSON output file exists"
+          cat "${{ runner.temp }}/validation-results-fail.json"
       
       - name: Validate JSON Output is Valid JSON (Failing)
         shell: bash
@@ -100,6 +104,7 @@ jobs:
             exit 1
           fi
           echo "✅ JSON output file is valid JSON"
+          cat "${{ runner.temp }}/validation-results-fail.json"
       
       - name: Validate JSON Output Content (Failing)
         shell: bash
@@ -126,6 +131,7 @@ jobs:
           fi
           
           echo "✅ JSON output content is correct for failing validation"
+          cat "${{ runner.temp }}/validation-results-fail.json"
       
       - name: Verify Failing Test Failed
         shell: bash
@@ -164,6 +170,7 @@ jobs:
             exit 1
           fi
           echo "✅ Text output file exists"
+          cat "${{ runner.temp }}/validation-results-pass.txt"
       
       - name: Validate Text Output Content (Passing)
         shell: bash
@@ -191,6 +198,7 @@ jobs:
           fi
           
           echo "✅ Text output content is correct for passing validation"
+          cat "${{ runner.temp }}/validation-results-pass.txt"
       
       - name: Test Text Output with Failing Validation
         id: test-text-failing
@@ -213,6 +221,7 @@ jobs:
             exit 1
           fi
           echo "✅ Text output file exists"
+          cat "${{ runner.temp }}/validation-results-fail.txt"
       
       - name: Validate Text Output Content (Failing)
         shell: bash
@@ -249,6 +258,7 @@ jobs:
           fi
           
           echo "✅ Text output content is correct for failing validation"
+          cat "${{ runner.temp }}/validation-results-fail.txt"
       
       - name: Verify Failing Test Failed
         shell: bash
@@ -301,6 +311,7 @@ jobs:
           fi
           
           echo "✅ JSON output works correctly with XML validation"
+          cat "${{ runner.temp }}/xml-validation-results.json"
 
   test-default-output-file:
     name: Test Default Output File Location
@@ -327,6 +338,7 @@ jobs:
             exit 1
           fi
           echo "✅ Default output file location works correctly"
+          cat "${{ runner.temp }}/validation-results"
       
       - name: Validate Default Output is Valid JSON
         shell: bash
@@ -336,6 +348,7 @@ jobs:
             exit 1
           fi
           echo "✅ Default output file is valid JSON"
+          cat "${{ runner.temp }}/validation-results"
 
   test-output-file-paths:
     name: Test Various Output File Paths
@@ -362,6 +375,7 @@ jobs:
             exit 1
           fi
           echo "✅ Nested directory output works correctly"
+          cat "${{ runner.temp }}/nested/dir/results.json"
       
       - name: Test Relative Path Output
         uses: ./
@@ -385,6 +399,7 @@ jobs:
             exit 1
           fi
           echo "✅ Relative path output works correctly"
+          cat "./validation-output.txt"
 
   test-mixed-formats:
     name: Test Mixed File Formats with Output
@@ -442,3 +457,4 @@ jobs:
           fi
           
           echo "✅ Mixed format validation output is correct"
+          cat "${{ runner.temp }}/mixed-results.json"
