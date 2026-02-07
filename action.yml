@@ -152,17 +152,15 @@ runs:
           exit 1
         fi
     
-    - name: Download Schema
+    - name: Validate Schema URL
       if: ${{ inputs.schema-url != '' }}
-      id: download-schema
+      id: validate-schema-url
       shell: bash
       env:
         SCHEMA_URL: ${{ inputs.schema-url }}
-        SCHEMA_OUTPUT_FILE: ${{ runner.temp }}/schema.json
       run: |
-        # Download the schema from the URL using wget
-        if ! wget -q -O "$SCHEMA_OUTPUT_FILE" "$SCHEMA_URL"; then
-          echo "::error::Failed to download schema from URL: $SCHEMA_URL."
+        # Check if the schema URL is reachable
+        if ! curl --head --silent --fail "$SCHEMA_URL" > /dev/null; then
+          echo "::error::Schema URL not reachable: $SCHEMA_URL."
           exit 1
         fi
-    
