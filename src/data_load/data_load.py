@@ -1,5 +1,6 @@
 import yaml
 import json
+import toml
 import xmltodict
 import requests
 from lxml import etree
@@ -31,7 +32,9 @@ class DataLoader:
             "yml": "yaml",
             "json": "json",
             "xml": "xml",
-            "xsd": "xml"
+            "xsd": "xml",
+            "toml": "toml",
+            "tml": "toml",
         }
         ext = file_path.split(".")[-1].lower()
         return format_map.get(ext, ext)
@@ -42,6 +45,7 @@ class DataLoader:
             "yaml": DataLoader.__load_yaml,
             "json": DataLoader.__load_json,
             "xml": DataLoader.__load_xml,
+            "toml": DataLoader.__load_toml,
         }
         return loaders.get(file_format)
     
@@ -51,6 +55,7 @@ class DataLoader:
             "yaml": yaml.safe_load,
             "json": json.loads,
             "xml": xmltodict.parse,
+            "toml": toml.loads,
         }
         return loaders.get(file_format)
 
@@ -68,6 +73,11 @@ class DataLoader:
     def __load_xml(file_path):
         with open(file_path, "r") as f:
             return xmltodict.parse(f.read())
+    
+    @staticmethod
+    def __load_toml(file_path):
+        with open(file_path, "r") as f:
+            return toml.load(f)
     
     @staticmethod
     def load_xsd_file(file_path):
