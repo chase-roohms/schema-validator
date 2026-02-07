@@ -1,0 +1,32 @@
+name: Create Release
+on:
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
+      update_parents:
+        description: 'Update parent version tags'
+        type: boolean
+        default: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: chase-roohms/tag-and-release@v1
+        with:
+          version_bump: ${{ inputs.version_bump }}
+          update_parent_tags: ${{ inputs.update_parents }}
