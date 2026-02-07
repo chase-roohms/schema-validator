@@ -3,7 +3,7 @@ import os
 
 from pprint import pp
 from data_load import DataLoader
-from jsonschema import validate, ValidationError
+from jsonschema import validate, ValidationError, SchemaError
 from lxml import etree
 
 def main():
@@ -87,9 +87,9 @@ def main():
                 # Validate using JSON Schema (works for JSON and YAML after parsing)
                 validate(instance=file_data, schema=schema_data)
                 print(f"File {file_path} is valid.")
-        except (ValidationError, etree.DocumentInvalid) as e:
+        except (SchemaError, etree.DocumentInvalid) as e:
             raise
-        except Exception as e:
+        except ValidationError as e:
             print(f"File {file_path} validation error: {e}")
             error_dict[file_path] = str(e)
     
