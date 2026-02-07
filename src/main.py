@@ -103,6 +103,9 @@ def main():
         print("Validation errors found:")
         reporter.print_results(errors_only=True)
         quit(1)
+    else:
+        print("All files are valid.")
+        reporter.print_results(errors_only=False)
 
 if __name__ == "__main__":
     main()
