@@ -22,7 +22,8 @@ class Reporter:
             prefix = not_prefix if result["passed"] else err_prefix
             suffix = not_suffix if result["passed"] else err_suffix
             print(f"{prefix}{key}: {suffix}")
-            print(result['notes'])
+            if result['notes'] and result['notes'] != "":
+                print(result['notes'])
     
     def write_results(self, file_path: str, format: str):
         # Make sure the directory exists
@@ -43,4 +44,5 @@ class Reporter:
         with open(file_path, "w") as f:
             for key, result in self.results.items():
                 f.write(f"{key}: {'valid' if result['passed'] else 'not valid'}\n")
-                f.write(f"{result['notes']}\n\n")
+                if result['notes'] and result['notes'] != "":
+                    f.write(f"{result['notes']}\n\n")
