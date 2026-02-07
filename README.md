@@ -1,22 +1,22 @@
 # Schema Validator
 
-[![Test Full Schema Validation](https://github.com/chase-roohms/schema-validator/actions/workflows/test-schema-validation.yml/badge.svg)](https://github.com/chase-roohms/schema-validator/actions/workflows/test-schema-validation.yml)
-[![Test Input Validation](https://github.com/chase-roohms/schema-validator/actions/workflows/test-input-validation.yml/badge.svg)](https://github.com/chase-roohms/schema-validator/actions/workflows/test-input-validation.yml)
-[![Test Output File and Format](https://github.com/chase-roohms/schema-validator/actions/workflows/test-output-file.yml/badge.svg)](https://github.com/chase-roohms/schema-validator/actions/workflows/test-output-file.yml)
-[![Test Action Outputs](https://github.com/chase-roohms/schema-validator/actions/workflows/test-action-outputs.yml/badge.svg)](https://github.com/chase-roohms/schema-validator/actions/workflows/test-action-outputs.yml)
+- [![Test Full Schema Validation](https://github.com/chase-roohms/schema-validator/actions/workflows/test-schema-validation.yml/badge.svg)](https://github.com/chase-roohms/schema-validator/actions/workflows/test-schema-validation.yml)
+- [![Test Input Validation](https://github.com/chase-roohms/schema-validator/actions/workflows/test-input-validation.yml/badge.svg)](https://github.com/chase-roohms/schema-validator/actions/workflows/test-input-validation.yml)
+- [![Test Output File and Format](https://github.com/chase-roohms/schema-validator/actions/workflows/test-output-file.yml/badge.svg)](https://github.com/chase-roohms/schema-validator/actions/workflows/test-output-file.yml)
+- [![Test Action Outputs](https://github.com/chase-roohms/schema-validator/actions/workflows/test-action-outputs.yml/badge.svg)](https://github.com/chase-roohms/schema-validator/actions/workflows/test-action-outputs.yml)
 
 A flexible GitHub Action for validating JSON, YAML, and XML files against schemas. Supports both local schema files and remote schema URLs, with comprehensive validation reporting in JSON or text format.
 
 ## Features
 
-- ✅ **Multi-Format Support**: Validate JSON, YAML, and XML files
-- 🌐 **Flexible Schema Sources**: Use local schema files or remote URLs
-- 🔄 **Schema Compatibility**: JSON and YAML schemas are interchangeable (both validate JSON/YAML files)
-- 📝 **Multiple Output Formats**: Generate validation reports in JSON or text format
-- 🎯 **Selective Validation**: Validate specific files or scan entire repository
-- 🚀 **Built-in Pre-validation**: Automatic checks for file existence, format compatibility, and schema reachability
-- 📊 **Detailed Error Reporting**: Comprehensive validation error messages
-- 🔗 **Composable**: Easy integration with other GitHub Actions (artifacts, notifications, etc.)
+- **Multi-Format Support**: Validate JSON, YAML, and XML files
+- **Flexible Schema Sources**: Use local schema files or remote URLs
+- **Schema Compatibility**: JSON and YAML schemas are interchangeable (both validate JSON/YAML files)
+- **Multiple Output Formats**: Generate validation reports in JSON or text format
+- **Selective Validation**: Validate specific files or scan entire repository
+- **Built-in Pre-validation**: Automatic checks for file existence, format compatibility, and schema reachability
+- **Detailed Error Reporting**: Comprehensive validation error messages
+- **Composable**: Easy integration with other GitHub Actions (artifacts, notifications, etc.)
 
 ## Table of Contents
 
