@@ -17,14 +17,16 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
 
       # Missing files and file-format
-      - name: Test Input Validation
+      - name: Missing files and file-format
+        id: missing-files-and-file-format
         uses: ./
         continue-on-error: true
         with:
           schema-file: test-files/example.schema.json
 
       # Missing schema-file and schema-url
-      - name: Test Input Validation
+      - name: Missing schema-file and schema-url
+        id: missing-schema-file-and-schema-url
         uses: ./
         continue-on-error: true
         with:
@@ -32,7 +34,8 @@ jobs:
             test-files/good_1.json
       
       # Invalid file-format option
-      - name: Test Input Validation
+      - name: Invalid file-format option
+        id: invalid-file-format-option
         uses: ./
         continue-on-error: true
         with:
@@ -42,7 +45,8 @@ jobs:
           schema-file: test-files/example.schema.json
       
       # Invalid schema-format option
-      - name: Test Input Validation
+      - name: Invalid schema-format option
+        id: invalid-schema-format-option
         uses: ./
         continue-on-error: true
         with:
@@ -52,7 +56,8 @@ jobs:
           schema-format: invalid-option
       
       # Invalid output-format option
-      - name: Test Input Validation
+      - name: Invalid output-format option
+        id: invalid-output-format-option
         uses: ./
         continue-on-error: true
         with:
@@ -60,12 +65,38 @@ jobs:
             test-files/good_1.json
           schema-file: test-files/example.schema.json
           output-format: invalid-option
+      
+      - name: Collect results
+        id: collect-results
+        env:
+          MISSING_FILES_AND_FILE_FORMAT: ${{ steps.missing-files-and-file-format.outcome }}
+          MISSING_SCHEMA_FILE_AND_SCHEMA_URL: ${{ steps.missing-schema-file-and-schema-url.outcome }}
+          INVALID_FILE_FORMAT_OPTION: ${{ steps.invalid-file-format-option.outcome }}
+          INVALID_SCHEMA_FORMAT_OPTION: ${{ steps.invalid-schema-format-option.outcome }}
+          INVALID_OUTPUT_FORMAT_OPTION: ${{ steps.invalid-output-format-option.outcome }}
+        run: |
+          echo "Missing files and file-format: $MISSING_FILES_AND_FILE_FORMAT" >> $GITHUB_STEP_SUMMARY
+          echo "Missing schema-file and schema-url: $MISSING_SCHEMA_FILE_AND_SCHEMA_URL" >> $GITHUB_STEP_SUMMARY
+          echo "Invalid file-format option: $INVALID_FILE_FORMAT_OPTION" >> $GITHUB_STEP_SUMMARY
+          echo "Invalid schema-format option: $INVALID_SCHEMA_FORMAT_OPTION" >> $GITHUB_STEP_SUMMARY
+          echo "Invalid output-format option: $INVALID_OUTPUT_FORMAT_OPTION" >> $GITHUB_STEP_SUMMARY
+          
+          # Validate that all tests failed
+          if [ "$MISSING_FILES_AND_FILE_FORMAT" != "failure" ] || \
+             [ "$MISSING_SCHEMA_FILE_AND_SCHEMA_URL" != "failure" ] || \
+             [ "$INVALID_FILE_FORMAT_OPTION" != "failure" ] || \
+             [ "$INVALID_SCHEMA_FORMAT_OPTION" != "failure" ] || \
+             [ "$INVALID_OUTPUT_FORMAT_OPTION" != "failure" ]; then
+            echo "::error::One or more tests did not fail as expected"
+            exit 1
+          fi
 
   test-files-exist:
     runs-on: ubuntu-latest
     steps:
       # Non-existent file
-      - name: Test Files Exist Validation
+      - name: Non-existent file
+        id: non-existent-file
         uses: ./
         continue-on-error: true
         with:
@@ -76,7 +107,8 @@ jobs:
           output-format: invalid-option
       
       # Non-existent schema
-      - name: Test Files Exist Validation
+      - name: Non-existent schema file
+        id: non-existent-schema-file
         uses: ./
         continue-on-error: true
         with:
@@ -84,3 +116,19 @@ jobs:
             test-files/good_1.json
           schema-file: test-files/non-existent.schema.json
           output-format: invalid-option
+      
+      - name: Collect results
+        id: collect-results
+        env:
+          NON_EXISTENT_FILE: ${{ steps.non-existent-file.outcome }}
+          NON_EXISTENT_SCHEMA_FILE: ${{ steps.non-existent-schema-file.outcome }}
+        run: |
+          echo "Non-existent file: $NON_EXISTENT_FILE" >> $GITHUB_STEP_SUMMARY
+          echo "Non-existent schema file: $NON_EXISTENT_SCHEMA_FILE" >> $GITHUB_STEP_SUMMARY
+          
+          # Validate that all tests failed
+          if [ "$NON_EXISTENT_FILE" != "failure" ] || \
+             [ "$NON_EXISTENT_SCHEMA_FILE" != "failure" ]; then
+            echo "::error::One or more tests did not fail as expected"
+            exit 1
+          fi
